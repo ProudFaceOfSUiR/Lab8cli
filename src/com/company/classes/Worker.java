@@ -1,6 +1,7 @@
 package com.company.classes;
 
 import java.time.ZonedDateTime;
+import java.util.Random;
 
 public class Worker {
     private Long id; //Поле не может быть null, Значение поля должно быть больше 0, Значение этого поля должно быть уникальным, Значение этого поля должно генерироваться автоматически
@@ -12,6 +13,16 @@ public class Worker {
     private java.time.ZonedDateTime endDate; //Поле может быть null
     private Position position; //Поле может быть null
     private Person person; //Поле может быть null
+
+    public Worker(String name, double salary){
+        this.name = name;
+        this.salary = salary;
+
+        this.creationDate = ZonedDateTime.now();
+
+        Random random = new Random();
+        this.id = Math.abs(Long.parseLong(String.valueOf(random.nextLong() + creationDate.getSecond() + creationDate.getMinute() + creationDate.getHour()).substring(0,10)));
+    }
 
     public Long getId() {
         return id;
@@ -44,11 +55,6 @@ public class Worker {
 
     public ZonedDateTime getCreationDate() {
         return creationDate;
-    }
-
-    public void setCreationDate() {
-        //todo
-        this.creationDate = creationDate;
     }
 
     public double getSalary() {
