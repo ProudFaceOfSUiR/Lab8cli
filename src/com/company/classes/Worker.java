@@ -24,6 +24,17 @@ public class Worker {
         this.id = Math.abs(Long.parseLong(String.valueOf(random.nextLong() + creationDate.getSecond() + creationDate.getMinute() + creationDate.getHour()).substring(0,10)));
     }
 
+    public Worker(String name, double salary, Position position){
+        this.name = name;
+        this.salary = salary;
+        this.position = position;
+
+        this.creationDate = ZonedDateTime.now();
+
+        Random random = new Random();
+        this.id = Math.abs(Long.parseLong(String.valueOf(random.nextLong() + creationDate.getSecond() + creationDate.getMinute() + creationDate.getHour()).substring(0,10)));
+    }
+
     public Long getId() {
         return id;
     }

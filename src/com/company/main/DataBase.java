@@ -1,9 +1,7 @@
 package com.company.main;
 
-import com.company.classes.Person;
 import com.company.classes.Position;
 import com.company.classes.Worker;
-import com.company.main.Commands;
 
 import java.io.File;
 import java.time.ZonedDateTime;
@@ -12,6 +10,12 @@ import java.time.format.FormatStyle;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Scanner;
+
+import org.w3c.dom.*;
+import org.xml.sax.SAXException;
+
+import javax.xml.parsers.*;
+import java.io.*;
 
 public class DataBase {
     private LinkedList<Worker> workers;
@@ -22,10 +26,10 @@ public class DataBase {
     public DataBase(){}
 
     public void initialize(String filePath){
-        readFromFile(filePath);
-
         this.workers = new LinkedList<>();
         this.terminal = new Scanner(System.in);
+
+        readFromFile(filePath);
 
         initializationTime = ZonedDateTime.now();
         System.out.println("Database has been initialized");
@@ -78,12 +82,52 @@ public class DataBase {
     }
 
     public void readFromFile(String filePath){
-        if (!filePath.matches("\\s*[A-Z]:\\/(\\w*\\/)*\\w+.txt")){ //todo change on xml
+        if (!filePath.matches("\\s*[A-Z]:\\/(\\w*\\/)*\\w+.xml")){ //todo change on xml
             System.out.println(filePath);
             System.out.println("Invalid filename. Try to read from file using READFROMFILE command");
         } else {
-            File initializationFile = new File(filePath);
-            System.out.println("File found!");
+            System.out.println("File found! Reading...");
+            xmlParser(new File(filePath));
+        }
+    }
+
+    protected void xmlParser(File file){
+        try {
+            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+            Document doc = dBuilder.parse(file);
+            doc.getDocumentElement().normalize();
+
+            NodeList nList = doc.getElementsByTagName("worker");
+
+            String name;
+            double salary = 1;
+            String positionString;
+            Position position;
+
+            for (int temp = 0; temp < nList.getLength(); temp++) {
+                Node nNode = nList.item(temp);
+
+                if (nNode.getNodeType() == Node.ELEMENT_NODE) {
+                    Element eElement = (Element) nNode;
+                    name = eElement.getElementsByTagName("name").item(0).getTextContent();
+                    salary = Double.parseDouble(eElement.getElementsByTagName("salary").item(0).getTextContent() );
+                    positionString = eElement.getElementsByTagName("position").item(0).getTextContent();
+
+                    if (Position.findEnum(positionString) != null){
+                        position = Position.findEnum(positionString);
+                        this.workers.add(new Worker(name, salary, position));
+                    } else {
+                        System.out.println(name + "'s position is invalid");
+                        System.out.println(positionString);
+                        this.workers.add(new Worker(name, salary));
+                    }
+                }
+            }
+
+            System.out.println("DataBase has been successfully filled with " + nList.getLength() + " workers");
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

@@ -7,6 +7,17 @@ public enum Position {
     BAKER,
     MANAGER_OF_CLEANING;
 
+    public static Position findEnum(String s){
+        s = s.toUpperCase();
+        Position position = null;
+        for (int i = 0; i < values().length; i++) {
+            if (s.equals(Position.values()[i].toString())){
+                 position = Position.values()[i];
+            }
+        }
+        return position;
+    }
+
     public static String[] getPositions()
     {
         String[] commands = new String[Position.values().length];
