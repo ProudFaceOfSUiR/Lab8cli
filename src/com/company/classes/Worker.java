@@ -1,5 +1,7 @@
 package com.company.classes;
 
+import com.company.enums.Position;
+
 import java.time.ZonedDateTime;
 import java.util.Random;
 

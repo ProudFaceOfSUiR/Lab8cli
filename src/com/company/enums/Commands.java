@@ -1,4 +1,4 @@
-package com.company.main;
+package com.company.enums;
 
 public enum Commands {
     HELP ("Available commands"),

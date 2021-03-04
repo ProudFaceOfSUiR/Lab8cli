@@ -1,4 +1,4 @@
-package com.company.classes;
+package com.company.enums;
 
 public enum Fields {
     NAME,
