@@ -1,5 +1,6 @@
 package com.company.database;
 
+import com.company.enums.Fields;
 import com.company.enums.Position;
 import com.company.classes.Worker;
 
@@ -43,6 +44,7 @@ public class DataBase {
         this.isInitialized = true;
 
         System.out.println("Database has been initialized");
+        System.out.println("------------------------------------");
 
         readFromFile(filePath);
         readFromTerminal();
@@ -83,12 +85,6 @@ public class DataBase {
             else if (command.matches("\\s*clear\\s*\\w*")){
                 clear();
             }
-            else if (command.matches("\\s*readfromfile\\s+(\\w|[/:.])+\\s*\\w*")){
-                System.out.println("Initial command: " + command);
-                command = removeCommand("readfromfile");
-                System.out.println("After parsing: " + command);
-                readFromFile(command);
-            }
             else if (command.matches("\\s*")) {
                 ;//do nothing if spaces are typed in
             }
@@ -108,13 +104,13 @@ public class DataBase {
         //checking if path is correct
         if (!filePath.matches("\\s*[A-Z]:\\/(\\w*\\/)*\\w+.xml")){
             System.out.println(filePath);
-            System.out.println("Invalid path. Try to read from file using ReadFromFile command");
+            System.out.println("Invalid path. Couldn't get file");
             return;
         }
         //check if exist
         Path p = Paths.get(filePath);
         if (Files.notExists(p)){
-            System.out.println("File doesn't exist! Try to read from file using ReadFromFile command");
+            System.out.println("File doesn't exist!");
             return;
         } else this.filePath = p;
 
@@ -192,6 +188,7 @@ public class DataBase {
             }
 
             System.out.println("DataBase has been successfully filled with " + successfullyAddedWorkers + " workers");
+            System.out.println("------------------------------------");
         } catch (Exception e) {
             System.out.println("Something went wrong :0");
         }
@@ -200,10 +197,33 @@ public class DataBase {
     protected void updateFields(int index){
         if (database.get(index) == null || index > database.size()){
             System.out.println("Invalid index!");
-        } else {
-            System.out.println("Which fields would you like to update: " + Arrays.stream(Position.getPositions()).toArray() + " ?");
-            //todo
+            return;
         }
+
+        System.out.println("Which fields would you like to update: " + Arrays.toString(Arrays.stream(Fields.getFields()).toArray()) + " ?");
+        String choice;
+        while (!Fields.isEnum(choice = terminal.nextLine())){
+            System.out.println("Incorrect field. Try again: ");
+        }
+        Fields field = Fields.findEnum(choice);
+        switch (field){
+            case NAME:
+                System.out.println("Please, type the new name: ");
+                database.get(index).setName(removeString(repeatInputAndExpectRegex("name", "\\s*\\w+\\s*"),"\\s*") );
+                break;
+            case SALARY:
+                System.out.println("Please, type the new salary: ");
+                database.get(index).setSalary(Double.parseDouble(removeString(repeatInputAndExpectRegex("salary", "\\s*\\d+\\.*\\d*\\s*"),"\\s*")));
+                break;
+            case POSITION:
+                //todo
+                System.out.println("Please, type the new position: ");
+                break;
+            case PERSONALITY:
+                //todo
+                break;
+        }
+        System.out.println("Worker was successfully updated!");
     }
 
     protected boolean binaryChoice(String move) throws UnknownCommandException {
@@ -220,19 +240,28 @@ public class DataBase {
         }
     }
 
-    protected String removeCommand(String command){
-        for (String s : Arrays.asList(command, " ")) {
-            System.out.println(command);
-            command = command.replace(s, "");
+    protected String removeString(String input, String string){
+        String output = input;
+        for (String s : Arrays.asList(string, " ", "\t")) {
+            output = output.replace(s, "");
         }
-        return command;
+        return output;
+    }
+
+    protected String repeatInputAndExpectRegex(String waitFor, String expectedRegex){
+        String output = terminal.nextLine();
+        while (!output.matches(expectedRegex)){
+            System.out.println("Incorrect " + waitFor + " Please, try again: ");
+            output = terminal.nextLine();
+        }
+        return output;
     }
 
     //terminal commands
 
     protected void updateById(String commandWithID){
         //removing spaces and "update" word to turn into long
-        commandWithID = removeCommand("update");
+        commandWithID = removeString(commandWithID, "update");
         long id = Long.parseLong(commandWithID);
 
         //trying to find element
@@ -244,30 +273,30 @@ public class DataBase {
     }
 
     protected void help(){
+        System.out.println("------------------------------------");
         System.out.println("Commands: ");
         for (int i = 0; i < Commands.values().length; i++) {
             System.out.println(" " + Commands.getCommandsWithDescriptions()[i]);
         }
+        System.out.println("------------------------------------");
     }
 
     protected void addWorker(){
         //input block
         System.out.print("PLease, write the name of a new worker: ");
-        String name = terminal.nextLine();
-        while (!name.matches("\\s*\\w+\\s*")){
-            System.out.print("Invalid name. Please, try again: ");
-            name = terminal.nextLine();
-        }
-        name = name.replaceAll("\\s*",""); //deleting whitespaces
+        String name = removeString(
+                repeatInputAndExpectRegex("name", "\\s*\\w+\\s*")
+                ," "
+        );
 
         System.out.print("PLease, input " + name + "'s salary: ");
-        double salary;
-        String temp = terminal.nextLine();
-        while (!temp.matches("\\s*\\d+\\.*\\d*\\s*")){
-            System.out.print("Invalid salary. Please, try again: ");
-            temp = terminal.nextLine();
-        }
-        salary = Double.valueOf(temp);
+        double salary = Double.parseDouble(
+                removeString(
+                        repeatInputAndExpectRegex("salary", "\\s*\\d+\\.*\\d*\\s*")
+                        ," ")
+        );
+
+        //todo other fields choice
 
         System.out.println("New worker was successfully added!");
 
@@ -280,16 +309,20 @@ public class DataBase {
             System.out.println("Database is empty");
             return;
         }
+        System.out.println("------------------------------------");
         System.out.println("Worker name | Worker's id | Worker's salary");
         for (int i = 0; i < database.size(); i++) {
             System.out.println(database.get(i).getName() + " " + database.get(i).getId() + " " + database.get(i).getSalary());
         }
+        System.out.println("------------------------------------");
     }
 
     protected void info(){
+        System.out.println("------------------------------------");
         System.out.println("Type: Linked List");
         System.out.println("Initialization date: " + initializationTime.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT, FormatStyle.MEDIUM)));
         System.out.println("Number of Workers: " + this.database.size());
+        System.out.println("------------------------------------");
     }
 
     protected void clear(){

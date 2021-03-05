@@ -17,8 +17,8 @@ public class Worker {
     private Person person; //Поле может быть null
 
     public Worker(String name, double salary){
-        this.name = name;
-        this.salary = salary;
+        setName(name);
+        setSalary(salary);
 
         this.creationDate = ZonedDateTime.now();
 
