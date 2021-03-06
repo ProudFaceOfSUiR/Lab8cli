@@ -1,3 +1,4 @@
-/lab51.iml
+*.iml
 /out/*
 .idea/*
+*.xml

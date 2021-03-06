@@ -4,7 +4,9 @@ import com.company.enums.Fields;
 import com.company.enums.Position;
 import com.company.classes.Worker;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -85,6 +87,9 @@ public class DataBase {
             }
             else if (command.matches("\\s*clear\\s*\\w*")){
                 clear();
+            }
+            else if (command.matches("\\s*save\\s*\\w*")){
+                save();
             }
             else if (command.matches("\\s*")) {
                 ;//do nothing if spaces are typed in
@@ -268,6 +273,30 @@ public class DataBase {
         return output;
     }
 
+    protected String dataBaseToXMLString(){
+        StringBuilder sb = new StringBuilder();
+
+        //writing preamble
+        sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>").append("\n");
+        sb.append("<database>").append("\n");
+
+        for (Worker w: database) {
+            sb.append("\t").append("<worker>").append("\n");
+
+            sb.append("\t\t").append("<name>").append(w.getName()).append("</name>").append("\n");
+            sb.append("\t\t").append("<salary>").append(w.getSalary()).append("</salary>").append("\n");
+
+            if (w.getPosition() != null){
+                sb.append("\t\t").append("<position>").append(w.getPosition().toString()).append("</position>").append("\n");
+            }
+
+            sb.append("\t").append("</worker>").append("\n");
+        }
+
+        sb.append("</database>");
+        return sb.toString();
+    }
+
     //terminal commands
 
     protected void updateById(String commandWithID){
@@ -351,6 +380,40 @@ public class DataBase {
     }
 
     protected void save(){
+        //input file name
+        System.out.print("Please, type the name of a new file: ");
+        String newFilename = removeString(repeatInputAndExpectRegex("filename", "\\s*\\w+\\s*"), " ");
 
+        //checking if file already exist
+        File f = new File(newFilename + ".xml");
+        if(f.exists() && !f.isDirectory()) {
+            try {
+                //asking if user wants to overwrite it
+                if (!binaryChoice("overwrite the existing file")){
+                    System.out.println("Operation cancelled");
+                    return;
+                }
+            } catch (UnknownCommandException e) {
+                System.out.println(e.getMessage());
+            }
+        }
+
+        try {
+            // Creates a FileWriter
+            FileWriter file = new FileWriter(newFilename + ".xml");
+
+            // Creates a BufferedWriter
+            BufferedWriter buffer = new BufferedWriter(file);
+
+            String output = dataBaseToXMLString();
+
+            buffer.write(output);
+            buffer.flush();
+
+            System.out.println("Databse was successfully saved to a new file!");
+            buffer.close();
+        } catch (Exception e){
+            System.out.println(e.getMessage());
+        }
     }
 }
