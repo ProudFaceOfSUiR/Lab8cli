@@ -1,6 +1,7 @@
 package com.company.classes;
 
 import com.company.enums.Position;
+import com.company.exceptions.InvalidDataException;
 
 import java.time.ZonedDateTime;
 import java.util.Random;
@@ -16,9 +17,17 @@ public class Worker {
     private Position position; //Поле может быть null
     private Person person; //Поле может быть null
 
-    public Worker(String name, double salary){
-        setName(name);
-        setSalary(salary);
+    public Worker(String name, double salary) throws InvalidDataException{
+        try {
+            setName(name);
+        } catch (InvalidDataException e) {
+            throw e;
+        }
+        try {
+            setSalary(salary);
+        } catch (InvalidDataException e) {
+            throw e;
+        }
 
         this.creationDate = ZonedDateTime.now();
 
@@ -26,9 +35,17 @@ public class Worker {
         this.id = Math.abs(Long.parseLong(String.valueOf(random.nextLong() + creationDate.getSecond() + creationDate.getMinute() + creationDate.getHour()).substring(0,10)));
     }
 
-    public Worker(String name, double salary, Position position){
-        this.name = name;
-        this.salary = salary;
+    public Worker(String name, double salary, Position position) throws InvalidDataException{
+        try {
+            setName(name);
+        } catch (InvalidDataException e) {
+            throw e;
+        }
+        try {
+            setSalary(salary);
+        } catch (InvalidDataException e) {
+            throw e;
+        }
         this.position = position;
 
         this.creationDate = ZonedDateTime.now();
@@ -41,18 +58,13 @@ public class Worker {
         return id;
     }
 
-    public void setId() {
-        //todo
-        this.id = id;
-    }
-
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public void setName(String name) throws InvalidDataException{
         if (name == null || name == ""){
-            System.out.println("Name cannot be empty");
+            throw new InvalidDataException("name", "It can't be empty");
         } else {
             this.name = name;
         }
@@ -74,9 +86,9 @@ public class Worker {
         return salary;
     }
 
-    public void setSalary(double salary) {
+    public void setSalary(double salary) throws InvalidDataException{
         if (salary <= 0){
-            System.out.println("Salary must be a positive number");
+            throw new InvalidDataException("salary","It must be a positive number");
         } else {
             this.salary = salary;
         }

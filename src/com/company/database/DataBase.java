@@ -16,6 +16,7 @@ import java.util.LinkedList;
 import java.util.Scanner;
 
 import com.company.enums.Commands;
+import com.company.exceptions.InvalidDataException;
 import com.company.exceptions.UnknownCommandException;
 import org.w3c.dom.*;
 
@@ -209,11 +210,21 @@ public class DataBase {
         switch (field){
             case NAME:
                 System.out.println("Please, type the new name: ");
-                database.get(index).setName(removeString(repeatInputAndExpectRegex("name", "\\s*\\w+\\s*"),"\\s*") );
+                try {
+                    database.get(index).setName(removeString(repeatInputAndExpectRegex("name", "\\s*\\w+\\s*"),"\\s*") );
+                } catch (InvalidDataException e) {
+                    System.out.println(e.getMessage());
+                    return;
+                }
                 break;
             case SALARY:
                 System.out.println("Please, type the new salary: ");
-                database.get(index).setSalary(Double.parseDouble(removeString(repeatInputAndExpectRegex("salary", "\\s*\\d+\\.*\\d*\\s*"),"\\s*")));
+                try {
+                    database.get(index).setSalary(Double.parseDouble(removeString(repeatInputAndExpectRegex("salary", "\\s*\\d+\\.*\\d*\\s*"),"\\s*")));
+                } catch (InvalidDataException e) {
+                    System.out.println(e.getMessage());
+                    return;
+                }
                 break;
             case POSITION:
                 //todo
@@ -298,10 +309,14 @@ public class DataBase {
 
         //todo other fields choice
 
-        System.out.println("New worker was successfully added!");
-
         //adding to database
-        this.database.add(new Worker(name, salary));
+        try {
+            this.database.add(new Worker(name, salary));
+            System.out.println("New worker was successfully added!");
+        } catch (InvalidDataException e) {
+            System.out.println(e.getMessage());
+            System.out.println("Couldn't add worker");
+        }
     }
 
     protected void show(){
@@ -331,7 +346,7 @@ public class DataBase {
                 database.clear();
             }
         } catch (UnknownCommandException e) {
-            System.out.println("Unknown command. Operation canceled");
+            System.out.println(e.getMessage());
         }
     }
 
