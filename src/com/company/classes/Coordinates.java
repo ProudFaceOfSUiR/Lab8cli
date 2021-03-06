@@ -9,6 +9,7 @@ public class Coordinates {
     }
 
     public void setX(long x) {
+        //todo change on exception
         if (x > 768){
             System.out.println("X cannot be bigger than 768");
         } else{
@@ -21,6 +22,7 @@ public class Coordinates {
     }
 
     public void setY(Integer y) {
+        //todo change on exception
         if (y == null){
             System.out.println("Y cannot be null");
         } else {

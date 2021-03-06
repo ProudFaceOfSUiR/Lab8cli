@@ -41,6 +41,7 @@ public class DataBase {
     //public methods
 
     public void initialize(String filePath){
+        //initializing variables
         this.database = new LinkedList<>();
         this.terminal = new Scanner(System.in);
         this.initializationTime = ZonedDateTime.now();
@@ -49,6 +50,7 @@ public class DataBase {
         System.out.println("Database has been initialized");
         System.out.println("------------------------------------");
 
+        //reading from file and then from terminal
         readFromFile(filePath);
         readFromTerminal();
     }
@@ -75,7 +77,6 @@ public class DataBase {
                 show();
             }
             else if (command.matches("\\s*exit\\s*\\w*")) {
-
                 System.out.println("Exiting..."); //todo haven't saved changes
                 break loop;
             }
@@ -133,6 +134,7 @@ public class DataBase {
     //protected methods
 
     protected int returnIndexById(long id){
+        //todo change on exception
         int index = -1;
         for (int i = 0; i < database.size(); i++) {
             if (database.get(i).getId() == id){
@@ -157,6 +159,7 @@ public class DataBase {
             String positionString;
             Position position;
 
+            //counter of successfully added workers
             int successfullyAddedWorkers = 0;
 
             for (int temp = 0; temp < nList.getLength(); temp++) {
@@ -180,6 +183,7 @@ public class DataBase {
 
                     positionString = eElement.getElementsByTagName("position").item(0).getTextContent();
 
+                    //todo change on something
                     if (Position.findEnum(positionString) != null){
                         position = Position.findEnum(positionString);
                         this.database.add(new Worker(name, salary, position));
@@ -201,11 +205,14 @@ public class DataBase {
     }
 
     protected void updateFields(int index){
+        //checking if element exists
         if (database.get(index) == null || index > database.size()){
             System.out.println("Invalid index!");
             return;
         }
 
+        //todo write loop
+        //choosing the field to update
         System.out.println("Which fields would you like to update: " + Arrays.toString(Arrays.stream(Fields.getFields()).toArray()) + " ?");
         String choice;
         while (!Fields.isEnum(choice = terminal.nextLine())){
@@ -232,7 +239,7 @@ public class DataBase {
                 }
                 break;
             case POSITION:
-                //todo
+                //todo write func to compare and get enum
                 System.out.println("Please, type the new position: ");
                 break;
             case PERSONALITY:
@@ -245,7 +252,7 @@ public class DataBase {
     protected boolean binaryChoice(String move) throws UnknownCommandException {
         System.out.println("Do you want to " + move + "? (Yes/No)");
         String command = terminal.nextLine();
-        //
+
         command = command.toUpperCase();
         if (command.matches("\\s*YES\\s*\\w*\\s*")){
             return true;
@@ -257,6 +264,7 @@ public class DataBase {
     }
 
     protected String removeString(String input, String string){
+        //removing string plus whitespaces and tabulations
         String output = input;
         for (String s : Arrays.asList(string, " ", "\t")) {
             output = output.replace(s, "");
@@ -280,6 +288,7 @@ public class DataBase {
         sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>").append("\n");
         sb.append("<database>").append("\n");
 
+        //writing workers
         for (Worker w: database) {
             sb.append("\t").append("<worker>").append("\n");
 
@@ -349,6 +358,7 @@ public class DataBase {
     }
 
     protected void show(){
+        //checking if database is empty
         if (database.isEmpty()){
             System.out.println("Database is empty");
             return;
@@ -371,8 +381,12 @@ public class DataBase {
 
     protected void clear(){
         try {
+            //asking if user really wants to clear the database
             if ( binaryChoice("clear the database") ){
                 database.clear();
+                System.out.println("The database was successfully cleared");
+            } else {
+                System.out.println("Operation cancelled");
             }
         } catch (UnknownCommandException e) {
             System.out.println(e.getMessage());
@@ -405,8 +419,10 @@ public class DataBase {
             // Creates a BufferedWriter
             BufferedWriter buffer = new BufferedWriter(file);
 
+            //getting the database in String
             String output = dataBaseToXMLString();
 
+            //writing and flushing to file
             buffer.write(output);
             buffer.flush();
 

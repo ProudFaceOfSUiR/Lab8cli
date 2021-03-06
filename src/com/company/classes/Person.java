@@ -9,6 +9,7 @@ public class Person {
     }
 
     public void setHeight(Long height) {
+        //todo change on exception
         if (height <= 0){
             System.out.println("Height must be positive number");
         } else{
@@ -21,6 +22,7 @@ public class Person {
     }
 
     public void setWeight(Integer weight) {
+        //todo change on exception
         if (weight <= 0){
             System.out.println("weight must be positive number");
         } else{
