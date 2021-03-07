@@ -34,8 +34,7 @@ public enum Commands {
         return argument;
     }
 
-    public static String[] getCommands()
-    {
+    public static String[] getCommands() {
         String[] commands = new String[Commands.values().length];
         Commands[] commandsEnum = values();
         for (int i = 0; i < Commands.values().length; i++) {
@@ -44,8 +43,7 @@ public enum Commands {
         return commands;
     }
 
-    public static String[] getCommandsWithDescriptions()
-    {
+    public static String[] getCommandsWithDescriptions() {
         String[] commands = new String[Commands.values().length];
         Commands[] commandsEnum = values();
         for (int i = 0; i < Commands.values().length; i++) {
@@ -56,5 +54,26 @@ public enum Commands {
             }
         }
         return commands;
+    }
+
+    public static Commands findEnum(String s){
+        s = s.toUpperCase();
+        Commands command = null;
+        for (int i = 0; i < values().length; i++) {
+            if (s.equals(Commands.values()[i].toString())){
+                command = Commands.values()[i];
+            }
+        }
+        return command;
+    }
+
+    public static boolean isEnum(String s){
+        s = s.toUpperCase();
+        for (int i = 0; i < values().length; i++) {
+            if (s.equals(Commands.values()[i].toString())){
+                return true;
+            }
+        }
+        return false;
     }
 }

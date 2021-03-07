@@ -63,7 +63,7 @@ public class Worker {
     }
 
     public void setName(String name) throws InvalidDataException{
-        if (name == null || name == ""){
+        if (name == null || name.equals("")){
             throw new InvalidDataException("name", "It can't be empty");
         } else {
             this.name = name;

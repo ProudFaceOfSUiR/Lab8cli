@@ -18,6 +18,16 @@ public enum Position {
         return position;
     }
 
+    public static boolean isEnum(String s){
+        s = s.toUpperCase();
+        for (int i = 0; i < values().length; i++) {
+            if (s.equals(Position.values()[i].toString())){
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static String[] getPositions()
     {
         String[] commands = new String[Position.values().length];

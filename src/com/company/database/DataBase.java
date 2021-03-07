@@ -19,6 +19,7 @@ import java.util.Scanner;
 
 import com.company.enums.Commands;
 import com.company.exceptions.InvalidDataException;
+import com.company.exceptions.OperationCanceled;
 import com.company.exceptions.UnknownCommandException;
 import org.w3c.dom.*;
 
@@ -55,6 +56,7 @@ public class DataBase {
         readFromTerminal();
     }
 
+    //todo to terminal
     public void readFromTerminal() {
         //cancelling if not initialized
         if(!isInitialized){
@@ -90,7 +92,11 @@ public class DataBase {
                 clear();
             }
             else if (command.matches("\\s*save\\s*\\w*")){
-                save();
+                try {
+                    save();
+                } catch (OperationCanceled operationCanceled) {
+                    System.out.println(operationCanceled.getMessage());
+                }
             }
             else if (command.matches("\\s*")) {
                 ;//do nothing if spaces are typed in
@@ -108,27 +114,12 @@ public class DataBase {
             return;
         }
 
-        //checking if path is correct
-        if (!filePath.matches("\\s*[A-Z]:\\/(\\w*\\/)*\\w+.xml")){
-            System.out.println(filePath);
-            System.out.println("Invalid path. Couldn't get file");
-            return;
-        }
-        //check if exist
-        Path p = Paths.get(filePath);
-        if (Files.notExists(p)){
-            System.out.println("File doesn't exist!");
-            return;
-        } else this.filePath = p;
-
-        //check permission to read
-        if (!Files.isReadable(this.filePath)){
-            System.out.println("File is restricted from editing. Aborting...");
-            return;
-        }
-
         //parsing
-        xmlParser(new File(String.valueOf(this.filePath)));
+        try {
+            this.database = FileParser.xmlToDatabase(filePath);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     //protected methods
@@ -143,65 +134,6 @@ public class DataBase {
             }
         }
         return index;
-    }
-
-    protected void xmlParser(File file){
-        try {
-            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-            Document doc = dBuilder.parse(file);
-            doc.getDocumentElement().normalize();
-
-            NodeList nList = doc.getElementsByTagName("worker");
-
-            String name;
-            double salary;
-            String positionString;
-            Position position;
-
-            //counter of successfully added workers
-            int successfullyAddedWorkers = 0;
-
-            for (int temp = 0; temp < nList.getLength(); temp++) {
-                Node nNode = nList.item(temp);
-
-                if (nNode.getNodeType() == Node.ELEMENT_NODE) {
-                    Element eElement = (Element) nNode;
-                    name = eElement.getElementsByTagName("name").item(0).getTextContent();
-
-                    if (name.matches("\\s*")){
-                        System.out.println("Invalid name. Couldn't add worker");
-                        continue;
-                    }
-
-                    if (eElement.getElementsByTagName("salary").item(0).getTextContent().matches("\\s*[0-9]+.*[0-9]*\\s*")){
-                        salary = Double.parseDouble(eElement.getElementsByTagName("salary").item(0).getTextContent() );
-                    } else {
-                        System.out.println(name + "'s salary is invalid. Couldn't add worker");
-                        continue;
-                    }
-
-                    positionString = eElement.getElementsByTagName("position").item(0).getTextContent();
-
-                    //todo change on something
-                    if (Position.findEnum(positionString) != null){
-                        position = Position.findEnum(positionString);
-                        this.database.add(new Worker(name, salary, position));
-                        successfullyAddedWorkers++;
-                    } else {
-                        System.out.println(name + "'s position is invalid: " + positionString);
-                        System.out.println("Worker was added without position");
-                        this.database.add(new Worker(name, salary));
-                        successfullyAddedWorkers++;
-                    }
-                }
-            }
-
-            System.out.println("DataBase has been successfully filled with " + successfullyAddedWorkers + " workers");
-            System.out.println("------------------------------------");
-        } catch (Exception e) {
-            System.out.println("Something went wrong :0");
-        }
     }
 
     protected void updateFields(int index){
@@ -223,7 +155,7 @@ public class DataBase {
             case NAME:
                 System.out.println("Please, type the new name: ");
                 try {
-                    database.get(index).setName(removeString(repeatInputAndExpectRegex("name", "\\s*\\w+\\s*"),"\\s*") );
+                    database.get(index).setName(Terminal.removeSpaces(Terminal.repeatInputAndExpectRegex("name", "\\s*\\w+\\s*")) );
                 } catch (InvalidDataException e) {
                     System.out.println(e.getMessage());
                     return;
@@ -232,7 +164,7 @@ public class DataBase {
             case SALARY:
                 System.out.println("Please, type the new salary: ");
                 try {
-                    database.get(index).setSalary(Double.parseDouble(removeString(repeatInputAndExpectRegex("salary", "\\s*\\d+\\.*\\d*\\s*"),"\\s*")));
+                    database.get(index).setSalary(Double.parseDouble(Terminal.removeSpaces(Terminal.repeatInputAndExpectRegex("salary", "\\s*\\d+\\.*\\d*\\s*"))));
                 } catch (InvalidDataException e) {
                     System.out.println(e.getMessage());
                     return;
@@ -249,68 +181,11 @@ public class DataBase {
         System.out.println("Worker was successfully updated!");
     }
 
-    protected boolean binaryChoice(String move) throws UnknownCommandException {
-        System.out.println("Do you want to " + move + "? (Yes/No)");
-        String command = terminal.nextLine();
-
-        command = command.toUpperCase();
-        if (command.matches("\\s*YES\\s*\\w*\\s*")){
-            return true;
-        } else if (command.matches("\\s*NO\\s*\\w*\\s*")){
-            return false;
-        } else {
-            throw new UnknownCommandException();
-        }
-    }
-
-    protected String removeString(String input, String string){
-        //removing string plus whitespaces and tabulations
-        String output = input;
-        for (String s : Arrays.asList(string, " ", "\t")) {
-            output = output.replace(s, "");
-        }
-        return output;
-    }
-
-    protected String repeatInputAndExpectRegex(String waitFor, String expectedRegex){
-        String output = terminal.nextLine();
-        while (!output.matches(expectedRegex)){
-            System.out.println("Incorrect " + waitFor + " Please, try again: ");
-            output = terminal.nextLine();
-        }
-        return output;
-    }
-
-    protected String dataBaseToXMLString(){
-        StringBuilder sb = new StringBuilder();
-
-        //writing preamble
-        sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>").append("\n");
-        sb.append("<database>").append("\n");
-
-        //writing workers
-        for (Worker w: database) {
-            sb.append("\t").append("<worker>").append("\n");
-
-            sb.append("\t\t").append("<name>").append(w.getName()).append("</name>").append("\n");
-            sb.append("\t\t").append("<salary>").append(w.getSalary()).append("</salary>").append("\n");
-
-            if (w.getPosition() != null){
-                sb.append("\t\t").append("<position>").append(w.getPosition().toString()).append("</position>").append("\n");
-            }
-
-            sb.append("\t").append("</worker>").append("\n");
-        }
-
-        sb.append("</database>");
-        return sb.toString();
-    }
-
     //terminal commands
 
     protected void updateById(String commandWithID){
         //removing spaces and "update" word to turn into long
-        commandWithID = removeString(commandWithID, "update");
+        commandWithID = Terminal.removeString(commandWithID, "update");
         long id = Long.parseLong(commandWithID);
 
         //trying to find element
@@ -333,16 +208,14 @@ public class DataBase {
     protected void addWorker(){
         //input block
         System.out.print("PLease, write the name of a new worker: ");
-        String name = removeString(
-                repeatInputAndExpectRegex("name", "\\s*\\w+\\s*")
-                ," "
+        String name = Terminal.removeSpaces(
+                Terminal.repeatInputAndExpectRegex("name", "\\s*\\w+\\s*")
         );
 
         System.out.print("PLease, input " + name + "'s salary: ");
         double salary = Double.parseDouble(
-                removeString(
-                        repeatInputAndExpectRegex("salary", "\\s*\\d+\\.*\\d*\\s*")
-                        ," ")
+                Terminal.removeSpaces(
+                        Terminal.repeatInputAndExpectRegex("salary", "\\s*\\d+\\.*\\d*\\s*"))
         );
 
         //todo other fields choice
@@ -382,7 +255,7 @@ public class DataBase {
     protected void clear(){
         try {
             //asking if user really wants to clear the database
-            if ( binaryChoice("clear the database") ){
+            if ( Terminal.binaryChoice("clear the database") ){
                 database.clear();
                 System.out.println("The database was successfully cleared");
             } else {
@@ -393,43 +266,15 @@ public class DataBase {
         }
     }
 
-    protected void save(){
+    protected void save() throws OperationCanceled{
         //input file name
         System.out.print("Please, type the name of a new file: ");
-        String newFilename = removeString(repeatInputAndExpectRegex("filename", "\\s*\\w+\\s*"), " ");
+        String newFilename = Terminal.removeSpaces(Terminal.repeatInputAndExpectRegex("filename", "\\s*\\w+\\s*")) + ".xml";
 
-        //checking if file already exist
-        File f = new File(newFilename + ".xml");
-        if(f.exists() && !f.isDirectory()) {
-            try {
-                //asking if user wants to overwrite it
-                if (!binaryChoice("overwrite the existing file")){
-                    System.out.println("Operation cancelled");
-                    return;
-                }
-            } catch (UnknownCommandException e) {
-                System.out.println(e.getMessage());
-            }
-        }
+        //checking if user wants to overwrite existing file
+        //if not - throw exception == canceling
+        FileParser.overWriteFile(newFilename);
 
-        try {
-            // Creates a FileWriter
-            FileWriter file = new FileWriter(newFilename + ".xml");
-
-            // Creates a BufferedWriter
-            BufferedWriter buffer = new BufferedWriter(file);
-
-            //getting the database in String
-            String output = dataBaseToXMLString();
-
-            //writing and flushing to file
-            buffer.write(output);
-            buffer.flush();
-
-            System.out.println("Databse was successfully saved to a new file!");
-            buffer.close();
-        } catch (Exception e){
-            System.out.println(e.getMessage());
-        }
+        FileParser.dataBasetoXML(FileParser.dataBaseToString(this.database), newFilename);
     }
 }
