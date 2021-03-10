@@ -14,6 +14,10 @@ import com.company.database.DataBase;
 import com.company.database.Terminal;
 import com.company.enums.Commands;
 
+import java.util.Scanner;
+
+import static com.company.database.Terminal.repeatInputAndExpectRegexOrNull;
+
 public class Main {
 
     public static void main(String[] args) {

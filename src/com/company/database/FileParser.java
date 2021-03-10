@@ -2,9 +2,6 @@ package com.company.database;
 
 import com.company.classes.Worker;
 import com.company.enums.Position;
-import com.company.exceptions.OperationCanceled;
-import com.company.exceptions.UnknownCommandException;
-import org.omg.CosNaming.NamingContextExtPackage.StringNameHelper;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -23,7 +20,7 @@ import java.util.LinkedList;
 public class FileParser {
 
     public static boolean pathCheck(String filePath){
-        if (!filePath.matches("\\s*[A-Z]:\\/(\\w*\\/)*\\w+.xml")){
+        if (!filePath.matches("\\s*[A-Z]:/(\\w*/)*\\w+.xml")){
             System.out.println(filePath);
             System.out.println("Invalid path. Couldn't get file");
             return false;
@@ -40,25 +37,14 @@ public class FileParser {
 
     public static boolean alreadyExistCheck(String filePath) {
         File f = new File(filePath);
-        if(f.exists() && !f.isDirectory()) {
-            return true;
-        }
-        return false;
+        return f.exists() && !f.isDirectory();
     }
 
-    public static boolean overWriteFile(String filePath) throws OperationCanceled{
+    public static boolean overWriteFile(String filePath){
         //check if file exists
         if (alreadyExistCheck(filePath)) {
-            try {
-                //giving the choice
-                if (Terminal.binaryChoice("overwrite the existing file")) {
-                    return true;
-                } else {
-                    return false;
-                }
-            } catch (UnknownCommandException e) {
-                throw new OperationCanceled();
-            }
+            //giving the choice
+            return Terminal.binaryChoice("overwrite the existing file");
         } else return true; //"overwriting" nonexistent file
     }
 
@@ -120,17 +106,16 @@ public class FileParser {
 
                     positionString = eElement.getElementsByTagName("position").item(0).getTextContent();
 
-                    //todo change on something
+                    //todo adding
                     if (Position.findEnum(positionString) != null){
                         position = Position.findEnum(positionString);
-                        database.add(new Worker(name, salary, position));
-                        successfullyAddedWorkers++;
+                        //database.add(new Worker(name, salary, position));
                     } else {
                         System.out.println(name + "'s position is invalid: " + positionString);
                         System.out.println("Worker was added without position");
-                        database.add(new Worker(name, salary));
-                        successfullyAddedWorkers++;
+                        //database.add(new Worker(name, salary));
                     }
+                    successfullyAddedWorkers++;
                 }
             }
 
@@ -180,7 +165,7 @@ public class FileParser {
             buffer.write(database);
             buffer.flush();
 
-            System.out.println("Databse was successfully saved to a new file!");
+            System.out.println("Database was successfully saved to a new file!");
             buffer.close();
         } catch (Exception e){
             System.out.println(e.getMessage());

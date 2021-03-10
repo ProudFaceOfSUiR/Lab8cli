@@ -8,6 +8,10 @@ public enum Position {
     MANAGER_OF_CLEANING;
 
     public static Position findEnum(String s){
+        if (s == null){
+            return null;
+        }
+
         s = s.toUpperCase();
         Position position = null;
         for (int i = 0; i < values().length; i++) {

@@ -17,7 +17,10 @@ public class Worker {
     private Position position; //Поле может быть null
     private Person person; //Поле может быть null
 
-    public Worker(String name, double salary) throws InvalidDataException{
+    public Worker() {}
+
+    public Worker(String name, double salary, Position position, Person person, Coordinates coordinates,
+                   ZonedDateTime startDate, ZonedDateTime endDate) throws InvalidDataException{
         try {
             setName(name);
         } catch (InvalidDataException e) {
@@ -29,29 +32,17 @@ public class Worker {
             throw e;
         }
 
-        this.creationDate = ZonedDateTime.now();
-
-        Random random = new Random();
-        this.id = Math.abs(Long.parseLong(String.valueOf(random.nextLong() + creationDate.getSecond() + creationDate.getMinute() + creationDate.getHour()).substring(0,10)));
-    }
-
-    public Worker(String name, double salary, Position position) throws InvalidDataException{
-        try {
-            setName(name);
-        } catch (InvalidDataException e) {
-            throw e;
-        }
-        try {
-            setSalary(salary);
-        } catch (InvalidDataException e) {
-            throw e;
-        }
+        this.coordinates = coordinates;
+        this.startDate = startDate;
+        this.endDate = endDate;
         this.position = position;
+        this.person = person;
 
         this.creationDate = ZonedDateTime.now();
 
         Random random = new Random();
         this.id = Math.abs(Long.parseLong(String.valueOf(random.nextLong() + creationDate.getSecond() + creationDate.getMinute() + creationDate.getHour()).substring(0,10)));
+
     }
 
     public Long getId() {

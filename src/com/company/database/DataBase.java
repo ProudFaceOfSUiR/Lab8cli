@@ -1,15 +1,14 @@
 package com.company.database;
 
+import com.company.classes.Person;
+import com.company.classes.WorkerBuilder;
 import com.company.enums.Fields;
-import com.company.enums.Position;
 import com.company.classes.Worker;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
@@ -21,19 +20,15 @@ import com.company.enums.Commands;
 import com.company.exceptions.InvalidDataException;
 import com.company.exceptions.OperationCanceled;
 import com.company.exceptions.UnknownCommandException;
-import org.w3c.dom.*;
-
-import javax.xml.parsers.*;
 
 public class DataBase {
     private LinkedList<Worker> database;
-
-    private Path filePath;
     private Scanner terminal;
+    private String scriptName;
+    private int recursionCounter;
 
     //check booleans
     private boolean isInitialized;
-    private boolean isSaved;
 
     private ZonedDateTime initializationTime;
 
@@ -46,6 +41,8 @@ public class DataBase {
         this.database = new LinkedList<>();
         this.terminal = new Scanner(System.in);
         this.initializationTime = ZonedDateTime.now();
+        this.recursionCounter = 0;
+        this.scriptName = "";
         this.isInitialized = true;
 
         System.out.println("Database has been initialized");
@@ -56,8 +53,8 @@ public class DataBase {
         readFromTerminal();
     }
 
-    //todo to terminal
-    public void readFromTerminal() {
+    //the old readFromTerminal
+    /*public void readFromTerminal() {
         //cancelling if not initialized
         if(!isInitialized){
             System.out.println("DataBase hasn't been initialized! Cancelling...");
@@ -66,9 +63,15 @@ public class DataBase {
 
         //reading from terminal and checking if command exist
         String command;
-        loop: while(true) {
+        while(true) {
+            //check when we read from file
+            if (!terminal.hasNext()){
+                return;
+            }
             command = terminal.nextLine();
             command = command.toLowerCase();
+
+            //todo fix regexes
             if (command.matches("\\s*help\\s*\\w*")) {
                 help();
             }
@@ -78,31 +81,116 @@ public class DataBase {
             else if (command.matches("\\s*show\\s*\\w*")) {
                 show();
             }
-            else if (command.matches("\\s*exit\\s*\\w*")) {
-                System.out.println("Exiting..."); //todo haven't saved changes
-                break loop;
-            }
             else if (command.matches("\\s*add\\s*\\w*")) {
-                addWorker();
+                try {
+                    add();
+                } catch (OperationCanceled operationCanceled) {
+                    System.out.println(operationCanceled.getMessage());
+                }
             }
-            else if (command.matches("\\s*update\\s+\\w+\\s*\\w*")){
+            else if (command.matches("\\s*update\\s+[0-9]+\\s*")){
                 updateById(command);
+            }
+            else if (command.matches("\\s*remove_by_id\\s+[0-9]+\\s*")){
+                remove(command);
             }
             else if (command.matches("\\s*clear\\s*\\w*")){
                 clear();
             }
             else if (command.matches("\\s*save\\s*\\w*")){
-                try {
-                    save();
-                } catch (OperationCanceled operationCanceled) {
-                    System.out.println(operationCanceled.getMessage());
-                }
+                save();
+            }
+            else if (command.matches("\\s*execute_script\\s+\\w+\\s*")){
+                executeScript(command);
+            }
+            else if (command.matches("\\s*exit\\s*\\w*")) {
+                System.out.println("Exiting...");
+                return;
             }
             else if (command.matches("\\s*")) {
                 ;//do nothing if spaces are typed in
             }
             else {
                 System.out.println("Invalid command");
+            }
+        }
+    }*/
+
+    public void readFromTerminal(){
+        //cancelling if not initialized
+        if(!isInitialized){
+            System.out.println("DataBase hasn't been initialized! Cancelling...");
+            return;
+        }
+
+        //reading from terminal and checking if command exist
+        String command;
+        while(true) {
+            //check when we read from file
+            if (!terminal.hasNext()) {
+                return;
+            }
+
+            //reading command
+            command = terminal.nextLine();
+            command = command.toLowerCase();
+
+            //skip empty line
+            if (command.matches("\\s")) continue;
+
+            try {
+                //getting command
+                Commands c = Terminal.matchCommand(command);
+
+                switch (c){
+                    case HELP:
+                        help();
+                        break;
+                    case INFO:
+                        info();
+                        break;
+                    case SHOW:
+                        show();
+                        break;
+                    case ADD:
+                        try {
+                            add();
+                        } catch (OperationCanceled operationCanceled) {
+                            System.out.println(operationCanceled.getMessage());
+                        }
+                        break;
+                    case UPDATE:
+                        updateById(command);
+                        break;
+                    case REMOVE_BY_ID:
+                        remove(command);
+                        break;
+                    case CLEAR:
+                        clear();
+                        break;
+                    case SAVE:
+                        save();
+                        break;
+                    case EXECUTE_SCRIPT:
+                        executeScript(command);
+                        break;
+                    case EXIT:
+                        System.exit(1);
+                    case ADD_IF_MAX:
+                        //todo
+                    case REMOVE_GREATER:
+                        //todo
+                    case REMOVE_LOWER:
+                        //todo
+                    case GROUP_COUNTING_BY_POSITION:
+                        //todo
+                    case COUNT_LESS_THAN_START_DATE:
+                        //todo
+                    case FILTER_GREATER_THAN_START_DATE:
+                        //todo
+                }
+            } catch (UnknownCommandException e) {
+                System.out.println(e.getMessage());
             }
         }
     }
@@ -191,7 +279,7 @@ public class DataBase {
         //trying to find element
         if (returnIndexById(id) != -1){
             updateFields(returnIndexById(id));
-        } else {
+            } else {
             System.out.println("Element not found");
         }
     }
@@ -205,29 +293,22 @@ public class DataBase {
         System.out.println("------------------------------------");
     }
 
-    protected void addWorker(){
-        //input block
-        System.out.print("PLease, write the name of a new worker: ");
-        String name = Terminal.removeSpaces(
-                Terminal.repeatInputAndExpectRegex("name", "\\s*\\w+\\s*")
-        );
+    protected void add() throws OperationCanceled{
+        WorkerBuilder wb = new WorkerBuilder();
 
-        System.out.print("PLease, input " + name + "'s salary: ");
-        double salary = Double.parseDouble(
-                Terminal.removeSpaces(
-                        Terminal.repeatInputAndExpectRegex("salary", "\\s*\\d+\\.*\\d*\\s*"))
-        );
-
-        //todo other fields choice
-
-        //adding to database
+        Worker w = null;
         try {
-            this.database.add(new Worker(name, salary));
-            System.out.println("New worker was successfully added!");
+            w = wb.newWorker();
         } catch (InvalidDataException e) {
             System.out.println(e.getMessage());
-            System.out.println("Couldn't add worker");
+            if (Terminal.binaryChoice("try to add worker again")){
+                add();
+            } else throw new OperationCanceled();
         }
+
+        //adding to database
+        this.database.add(w);
+        System.out.println("New worker was successfully added!");
     }
 
     protected void show(){
@@ -237,9 +318,27 @@ public class DataBase {
             return;
         }
         System.out.println("------------------------------------");
-        System.out.println("Worker name | Worker's id | Worker's salary");
-        for (int i = 0; i < database.size(); i++) {
-            System.out.println(database.get(i).getName() + " " + database.get(i).getId() + " " + database.get(i).getSalary());
+        System.out.println("Name | id | Salary | Position | Personality | Coordinates | Dates");
+        String sout;
+        StringBuilder sb = new StringBuilder();
+        for (Worker worker : database) {
+            sb.append(worker.getName()).append(" | ").append(worker.getId()).append(" | ").append(worker.getSalary()).append(" | ");
+
+            if (worker.getPosition() != null){
+                sb.append(worker.getPosition().toString()).append(" | ");
+            }
+
+            if (worker.getPerson().getHeight() != null){
+                sb.append(worker.getPerson().getHeight()).append(" | ");
+            }
+            if (worker.getPerson().getWeight() != null){
+                sb.append(worker.getPerson().getWeight()).append(" | ");
+            }
+
+            sb.append(worker.getCoordinates().getX()).append(" | ");
+
+            System.out.println(sb.toString());
+            sb.delete(0, sb.length());
         }
         System.out.println("------------------------------------");
     }
@@ -253,20 +352,16 @@ public class DataBase {
     }
 
     protected void clear(){
-        try {
-            //asking if user really wants to clear the database
-            if ( Terminal.binaryChoice("clear the database") ){
-                database.clear();
-                System.out.println("The database was successfully cleared");
-            } else {
-                System.out.println("Operation cancelled");
-            }
-        } catch (UnknownCommandException e) {
-            System.out.println(e.getMessage());
+        //asking if user really wants to clear the database
+        if ( Terminal.binaryChoice("clear the database") ){
+            database.clear();
+            System.out.println("The database was successfully cleared");
+        } else {
+            System.out.println("Operation cancelled");
         }
     }
 
-    protected void save() throws OperationCanceled{
+    protected void save(){
         //input file name
         System.out.print("Please, type the name of a new file: ");
         String newFilename = Terminal.removeSpaces(Terminal.repeatInputAndExpectRegex("filename", "\\s*\\w+\\s*")) + ".xml";
@@ -276,5 +371,63 @@ public class DataBase {
         FileParser.overWriteFile(newFilename);
 
         FileParser.dataBasetoXML(FileParser.dataBaseToString(this.database), newFilename);
+    }
+
+    protected void remove(String commandWithID){
+        //removing spaces and "remove" word to turn into long
+        commandWithID = Terminal.removeString(commandWithID, "remove_by_id");
+        long id = Long.parseLong(commandWithID);
+
+        //trying to find element
+        if (returnIndexById(id) != -1){
+            if (Terminal.binaryChoice("delete worker")){
+                this.database.remove(returnIndexById(id));
+                System.out.println("Worker was successfully deleted from the database");
+            } else {
+                System.out.println("Operation canceled");
+            }
+        } else {
+            System.out.println("Element not found");
+        }
+    }
+
+    protected void executeScript(String commandWithFilename){
+        //removing spaces and "remove" word to turn into long
+        commandWithFilename = Terminal.removeString(commandWithFilename, "execute_script") + ".txt";
+
+        if (this.scriptName.equals(commandWithFilename)){
+            this.recursionCounter++;
+        } else {
+            this.scriptName = commandWithFilename;
+            this.recursionCounter = 0;
+        }
+
+        if (this.recursionCounter > 10){
+            System.out.println("Executing stopped to avoid stack overflow");
+            this.scriptName = commandWithFilename;
+            this.recursionCounter = 0;
+            this.terminal = new Scanner(System.in);
+            Terminal.changeScanner(this.terminal);
+            readFromTerminal();
+            return;
+        }
+
+        File f = new File(commandWithFilename);
+        if ( FileParser.alreadyExistCheck(commandWithFilename)){
+            try {
+                System.out.println("It reads");
+                this.terminal = new Scanner(f);
+                Terminal.changeScanner(this.terminal);
+                while (this.terminal.hasNext()) {
+                    readFromTerminal();
+                }
+            } catch (FileNotFoundException e) {
+                System.out.println(e.getMessage());
+            }
+        }
+        System.out.println("It stopped");
+        this.terminal = new Scanner(System.in);
+        Terminal.changeScanner(this.terminal);
+        readFromTerminal();
     }
 }

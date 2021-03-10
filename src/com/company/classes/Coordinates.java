@@ -1,5 +1,7 @@
 package com.company.classes;
 
+import com.company.exceptions.InvalidDataException;
+
 public class Coordinates {
     private long x; //Максимальное значение поля: 768
     private Integer y; //Поле не может быть null
@@ -8,10 +10,9 @@ public class Coordinates {
         return x;
     }
 
-    public void setX(long x) {
-        //todo change on exception
+    public void setX(long x) throws InvalidDataException {
         if (x > 768){
-            System.out.println("X cannot be bigger than 768");
+            throw new InvalidDataException("x", "X cannot be bigger than 768");
         } else{
             this.x = x;
         }
@@ -21,10 +22,9 @@ public class Coordinates {
         return y;
     }
 
-    public void setY(Integer y) {
-        //todo change on exception
+    public void setY(Integer y) throws InvalidDataException {
         if (y == null){
-            System.out.println("Y cannot be null");
+            throw new InvalidDataException("y", "Y cannot be null");
         } else {
             this.y = y;
         }
