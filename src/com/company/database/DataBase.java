@@ -1,14 +1,11 @@
 package com.company.database;
 
-import com.company.classes.Person;
 import com.company.classes.WorkerBuilder;
 import com.company.enums.Fields;
 import com.company.classes.Worker;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
@@ -18,7 +15,7 @@ import java.util.Scanner;
 
 import com.company.enums.Commands;
 import com.company.exceptions.InvalidDataException;
-import com.company.exceptions.OperationCanceled;
+import com.company.exceptions.OperationCanceledException;
 import com.company.exceptions.UnknownCommandException;
 
 public class DataBase {
@@ -84,7 +81,7 @@ public class DataBase {
             else if (command.matches("\\s*add\\s*\\w*")) {
                 try {
                     add();
-                } catch (OperationCanceled operationCanceled) {
+                } catch (OperationCanceledException operationCanceled) {
                     System.out.println(operationCanceled.getMessage());
                 }
             }
@@ -155,8 +152,8 @@ public class DataBase {
                     case ADD:
                         try {
                             add();
-                        } catch (OperationCanceled operationCanceled) {
-                            System.out.println(operationCanceled.getMessage());
+                        } catch (OperationCanceledException operationCanceledException) {
+                            System.out.println(operationCanceledException.getMessage());
                         }
                         break;
                     case UPDATE:
@@ -224,6 +221,7 @@ public class DataBase {
         return index;
     }
 
+    //todo catch EOF
     protected void updateFields(int index){
         //checking if element exists
         if (database.get(index) == null || index > database.size()){
@@ -244,7 +242,7 @@ public class DataBase {
                 System.out.println("Please, type the new name: ");
                 try {
                     database.get(index).setName(Terminal.removeSpaces(Terminal.repeatInputAndExpectRegex("name", "\\s*\\w+\\s*")) );
-                } catch (InvalidDataException e) {
+                } catch (InvalidDataException | OperationCanceledException e) {
                     System.out.println(e.getMessage());
                     return;
                 }
@@ -253,7 +251,7 @@ public class DataBase {
                 System.out.println("Please, type the new salary: ");
                 try {
                     database.get(index).setSalary(Double.parseDouble(Terminal.removeSpaces(Terminal.repeatInputAndExpectRegex("salary", "\\s*\\d+\\.*\\d*\\s*"))));
-                } catch (InvalidDataException e) {
+                } catch (InvalidDataException | OperationCanceledException e) {
                     System.out.println(e.getMessage());
                     return;
                 }
@@ -293,7 +291,7 @@ public class DataBase {
         System.out.println("------------------------------------");
     }
 
-    protected void add() throws OperationCanceled{
+    protected void add() throws OperationCanceledException {
         WorkerBuilder wb = new WorkerBuilder();
 
         Worker w = null;
@@ -303,7 +301,7 @@ public class DataBase {
             System.out.println(e.getMessage());
             if (Terminal.binaryChoice("try to add worker again")){
                 add();
-            } else throw new OperationCanceled();
+            } else throw new OperationCanceledException();
         }
 
         //adding to database
@@ -353,22 +351,39 @@ public class DataBase {
 
     protected void clear(){
         //asking if user really wants to clear the database
-        if ( Terminal.binaryChoice("clear the database") ){
-            database.clear();
-            System.out.println("The database was successfully cleared");
-        } else {
-            System.out.println("Operation cancelled");
+        try {
+            if ( Terminal.binaryChoice("clear the database") ){
+                database.clear();
+                System.out.println("The database was successfully cleared");
+            } else {
+                System.out.println("Operation cancelled");
+            }
+        } catch (OperationCanceledException e) {
+            //catch EOF
+            System.out.println(e.getMessage());
+            return;
         }
     }
 
     protected void save(){
         //input file name
         System.out.print("Please, type the name of a new file: ");
-        String newFilename = Terminal.removeSpaces(Terminal.repeatInputAndExpectRegex("filename", "\\s*\\w+\\s*")) + ".xml";
+        String newFilename = null;
+        try {
+            newFilename = Terminal.removeSpaces(Terminal.repeatInputAndExpectRegex("filename", "\\s*\\w+\\s*")) + ".xml";
+        } catch (OperationCanceledException e) {
+            System.out.println(e.getMessage());
+            return;
+        }
 
         //checking if user wants to overwrite existing file
         //if not - throw exception == canceling
-        FileParser.overWriteFile(newFilename);
+        try {
+            FileParser.overWriteFile(newFilename);
+        } catch (OperationCanceledException e) {
+            System.out.println(e.getMessage());
+            return;
+        }
 
         FileParser.dataBasetoXML(FileParser.dataBaseToString(this.database), newFilename);
     }
@@ -380,11 +395,17 @@ public class DataBase {
 
         //trying to find element
         if (returnIndexById(id) != -1){
-            if (Terminal.binaryChoice("delete worker")){
-                this.database.remove(returnIndexById(id));
-                System.out.println("Worker was successfully deleted from the database");
-            } else {
-                System.out.println("Operation canceled");
+            try {
+                if (Terminal.binaryChoice("delete worker")){
+                    this.database.remove(returnIndexById(id));
+                    System.out.println("Worker was successfully deleted from the database");
+                } else {
+                    System.out.println("Operation canceled");
+                }
+            } catch (OperationCanceledException e) {
+                //catching EOF
+                System.out.println(e.getMessage());
+                return;
             }
         } else {
             System.out.println("Element not found");
@@ -395,6 +416,7 @@ public class DataBase {
         //removing spaces and "remove" word to turn into long
         commandWithFilename = Terminal.removeString(commandWithFilename, "execute_script") + ".txt";
 
+        //catching recursion
         if (this.scriptName.equals(commandWithFilename)){
             this.recursionCounter++;
         } else {
@@ -402,6 +424,7 @@ public class DataBase {
             this.recursionCounter = 0;
         }
 
+        //stopping if recursion detected
         if (this.recursionCounter > 10){
             System.out.println("Executing stopped to avoid stack overflow");
             this.scriptName = commandWithFilename;
@@ -412,10 +435,12 @@ public class DataBase {
             return;
         }
 
+        //new file and check if it exist
         File f = new File(commandWithFilename);
         if ( FileParser.alreadyExistCheck(commandWithFilename)){
             try {
-                System.out.println("It reads");
+                //changing terminal scanner on file's
+                //IMPORTANT: THE LINK TO DATABASE'S SCANNER IS GIVEN, NOT NEW
                 this.terminal = new Scanner(f);
                 Terminal.changeScanner(this.terminal);
                 while (this.terminal.hasNext()) {
@@ -425,9 +450,10 @@ public class DataBase {
                 System.out.println(e.getMessage());
             }
         }
-        System.out.println("It stopped");
+        //chaging terminal back
         this.terminal = new Scanner(System.in);
         Terminal.changeScanner(this.terminal);
+        //continue reading
         readFromTerminal();
     }
 }

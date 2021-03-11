@@ -1,6 +1,6 @@
 package com.company.enums;
-//todo write descriptions
 public enum Commands {
+    //args should be in {} for better formatting
     HELP ("","Available commands"),
     INFO ("","Information about current stat of Collection"),
     SHOW ("","Prints all the elements"),
@@ -10,13 +10,13 @@ public enum Commands {
     CLEAR("","Clears the database"),
     SAVE("","Save the database to a file"),
     EXECUTE_SCRIPT("",""),
-    EXIT("","Exit databse"),
-    ADD_IF_MAX("",""),
-    REMOVE_GREATER("",""),
-    REMOVE_LOWER("",""),
-    GROUP_COUNTING_BY_POSITION("",""),
-    COUNT_LESS_THAN_START_DATE("",""),
-    FILTER_GREATER_THAN_START_DATE("","");
+    EXIT("","Exit database"),
+    ADD_IF_MAX("","Add element, if its SALARY is max"),
+    REMOVE_GREATER("{salary}","Remove all elements, greater than given"),
+    REMOVE_LOWER("{salary}","Remove all elements, lower than given"),
+    GROUP_COUNTING_BY_POSITION("","Print groups made by position"),
+    COUNT_LESS_THAN_START_DATE("{start date (yyyy-mm-dd)}","Print number of elements with START DATE lesser than given"),
+    FILTER_GREATER_THAN_START_DATE("{start date (yyyy-mm-dd)}","Print elements with START DATE greater than given");
 
     private String argument;
     private String description;

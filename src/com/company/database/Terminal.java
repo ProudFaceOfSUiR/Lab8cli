@@ -1,19 +1,18 @@
 package com.company.database;
 
 import com.company.enums.Commands;
-import com.company.exceptions.InvalidDataException;
+import com.company.exceptions.OperationCanceledException;
 import com.company.exceptions.UnknownCommandException;
 
 import java.util.Arrays;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 public class Terminal {
     private static Scanner terminal = new Scanner(System.in);
-    private static boolean readingFile = false;
 
     public static void changeScanner(Scanner s){
         Terminal.terminal = s;
-        readingFile = !readingFile;
     }
 
     public static String removeString(String input, String string){
@@ -41,15 +40,15 @@ public class Terminal {
         return output;
     }
 
-    public static boolean binaryChoice(String move){
+    public static boolean binaryChoice(String move) throws OperationCanceledException{
         System.out.println("Do you want to " + move + "? (Yes/No)");
-        if (readingFile) {
-            if (!terminal.hasNext()) {
-                return false;
-            }
-        }
-        String command = terminal.nextLine();
 
+        String command;
+        try {
+            command = terminal.nextLine();
+        } catch (NoSuchElementException e){
+            throw new OperationCanceledException();
+        }
         command = command.toUpperCase();
         if (command.matches("\\s*YES\\s*\\w*\\s*")){
             return true;
@@ -61,31 +60,31 @@ public class Terminal {
         return false;
     }
 
-    public static String repeatInputAndExpectRegex(String waitFor, String expectedRegex){
-        if (readingFile) {
-            if (!terminal.hasNext()) {
-                return null;
+    public static String repeatInputAndExpectRegex(String waitFor, String expectedRegex) throws OperationCanceledException {
+        String output;
+        try {
+            output = terminal.nextLine();
+            while (!output.matches(expectedRegex)) {
+                System.out.println("Incorrect " + waitFor + " Please, try again: ");
+                output = terminal.nextLine();
             }
         }
-        String output = terminal.nextLine();
-        while (!output.matches(expectedRegex)){
-            System.out.println("Incorrect " + waitFor + " Please, try again: ");
-            output = terminal.nextLine();
+        catch(NoSuchElementException e){
+            throw new OperationCanceledException();
         }
         return output;
     }
 
-    public static String repeatInputAndExpectRegexOrNull(String waitFor, String expectedRegex){
-        if (readingFile) {
-            if (!terminal.hasNext()) {
-                return null;
-            }
-        }
+    public static String repeatInputAndExpectRegexOrNull(String waitFor, String expectedRegex) throws OperationCanceledException {
         String output;
-        output = terminal.nextLine();
-        while (!output.matches(expectedRegex) && !output.isEmpty()){
-            System.out.println("Incorrect " + waitFor + " Please, try again: ");
+        try {
             output = terminal.nextLine();
+            while (!output.matches(expectedRegex) && !output.isEmpty()) {
+                System.out.println("Incorrect " + waitFor + " Please, try again: ");
+                output = terminal.nextLine();
+            }
+        } catch (NoSuchElementException e){
+            throw new OperationCanceledException();
         }
         if (output.isEmpty()){
             return null;

@@ -2,6 +2,7 @@ package com.company.database;
 
 import com.company.classes.Worker;
 import com.company.enums.Position;
+import com.company.exceptions.OperationCanceledException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -40,11 +41,15 @@ public class FileParser {
         return f.exists() && !f.isDirectory();
     }
 
-    public static boolean overWriteFile(String filePath){
+    public static boolean overWriteFile(String filePath) throws OperationCanceledException{
         //check if file exists
         if (alreadyExistCheck(filePath)) {
             //giving the choice
-            return Terminal.binaryChoice("overwrite the existing file");
+            try {
+                return Terminal.binaryChoice("overwrite the existing file");
+            } catch (OperationCanceledException e) {
+                throw e;
+            }
         } else return true; //"overwriting" nonexistent file
     }
 

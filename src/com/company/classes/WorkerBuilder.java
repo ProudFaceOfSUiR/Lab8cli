@@ -4,10 +4,10 @@ import com.company.database.Terminal;
 import com.company.enums.Fields;
 import com.company.enums.Position;
 import com.company.exceptions.InvalidDataException;
+import com.company.exceptions.OperationCanceledException;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Objects;
@@ -23,7 +23,7 @@ public class WorkerBuilder {
         worker = new Worker();
     }
 
-    public Worker newWorker() throws InvalidDataException{
+    public Worker newWorker() throws InvalidDataException, OperationCanceledException{
         setName();
         setSalary();
         setPosition();
@@ -33,33 +33,45 @@ public class WorkerBuilder {
         return new Worker(worker.getName(),worker.getSalary(), worker.getPosition(), worker.getPerson(), worker.getCoordinates(), worker.getStartDate(), worker.getEndDate());
     }
 
-    protected void setName() throws InvalidDataException{
+    protected void setName() throws InvalidDataException, OperationCanceledException{
         System.out.print("Please, write the name of a new worker: ");
         try {
-            worker.setName(
-                    Terminal.removeSpaces(
-                        Terminal.repeatInputAndExpectRegex("name", "\\s*\\w+\\s*")
-                    )
-                );
+            try {
+                worker.setName(
+                        Terminal.removeSpaces(
+                            Terminal.repeatInputAndExpectRegex("name", "\\s*\\w+\\s*")
+                        )
+                    );
+            } catch (OperationCanceledException e) {
+                throw e;
+            }
         } catch (InvalidDataException e) {
             throw e;
         }
     }
 
-    protected void setSalary() throws InvalidDataException{
+    protected void setSalary() throws InvalidDataException, OperationCanceledException{
         System.out.print("PLease, input " + worker.getName() + "'s salary: ");
-        worker.setSalary(
-                Double.parseDouble(
-                    Terminal.removeSpaces(
-                        Terminal.repeatInputAndExpectRegex("salary", "\\s*\\d+\\.*\\d*\\s*"))
-                )
-            );
+        try {
+            worker.setSalary(
+                    Double.parseDouble(
+                        Terminal.removeSpaces(
+                            Terminal.repeatInputAndExpectRegex("salary", "\\s*\\d+\\.*\\d*\\s*"))
+                    )
+                );
+        } catch (OperationCanceledException e) {
+            throw e;
+        }
     }
 
     //todo invalid position
-    protected void setPosition(){
+    protected void setPosition() throws OperationCanceledException{
         System.out.println("Please, write " + worker.getName() + "'s position " + Arrays.toString(Arrays.stream(Position.getPositions()).toArray()) + ": ");
-        worker.setPosition(Position.findEnum(Terminal.repeatInputAndExpectRegexOrNull("position","\\s*\\w+\\s*")));
+        try {
+            worker.setPosition(Position.findEnum(Terminal.repeatInputAndExpectRegexOrNull("position","\\s*\\w+\\s*")));
+        } catch (OperationCanceledException e) {
+            throw e;
+        }
     }
 
     protected void setPersonality(){
@@ -80,7 +92,7 @@ public class WorkerBuilder {
         this.worker.setPerson(person);
     }
 
-    protected void setCoordinates() throws InvalidDataException{
+    protected void setCoordinates() throws InvalidDataException, OperationCanceledException{
         System.out.println("PLease, input " + worker.getName() + "'s coordinates");
         Coordinates c = new Coordinates();
 
@@ -105,19 +117,19 @@ public class WorkerBuilder {
         this.worker.setCoordinates(c);
     }
 
-    //todo invalid date parse
-    protected void setDates(){
+    protected void setDates() throws OperationCanceledException{
         System.out.println("Please, write the start day (yyyy-mm-dd): ");
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDate date = LocalDate.parse(Terminal.removeSpaces(Terminal.repeatInputAndExpectRegex(
-                "the start day", "/\\s*\\d{4}-(0[1,2,3,4,5,6,7,8,9]|1[0,1,2])-[0,1,2,3]\\d\\s*/gm")), formatter);
+                "start day", "\\s*(?!0000)(\\d{4})-(0[1-9]|1[0-2])-[0-3]\\d\\s*")), formatter);
 
         worker.setStartDate( date.atStartOfDay(ZoneId.systemDefault()) );
 
         System.out.println("Please, write the end day (yyyy-mm-dd): ");
-        String enddate = Terminal.removeSpaces(
-                Terminal.repeatInputAndExpectRegexOrNull("the end day", "/\\s*\\d{4}-(0[1,2,3,4,5,6,7,8,9]|1[0,1,2])-[0,1,2,3]\\d\\s*/gm")
+        String enddate = null;
+        enddate = Terminal.removeSpaces(
+                Terminal.repeatInputAndExpectRegexOrNull("end day", "\\s*(?!0000)(\\d{4})-(0[1-9]|1[0-2])-[0-3]\\d\\s*")
         );
         if (enddate == null){
             worker.setEndDate(null);
