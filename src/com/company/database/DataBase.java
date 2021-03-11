@@ -14,6 +14,7 @@ import java.util.LinkedList;
 import java.util.Scanner;
 
 import com.company.enums.Commands;
+import com.company.enums.Position;
 import com.company.exceptions.InvalidDataException;
 import com.company.exceptions.OperationCanceledException;
 import com.company.exceptions.UnknownCommandException;
@@ -49,69 +50,6 @@ public class DataBase {
         readFromFile(filePath);
         readFromTerminal();
     }
-
-    //the old readFromTerminal
-    /*public void readFromTerminal() {
-        //cancelling if not initialized
-        if(!isInitialized){
-            System.out.println("DataBase hasn't been initialized! Cancelling...");
-            return;
-        }
-
-        //reading from terminal and checking if command exist
-        String command;
-        while(true) {
-            //check when we read from file
-            if (!terminal.hasNext()){
-                return;
-            }
-            command = terminal.nextLine();
-            command = command.toLowerCase();
-
-            //todo fix regexes
-            if (command.matches("\\s*help\\s*\\w*")) {
-                help();
-            }
-            else if (command.matches("\\s*info\\s*\\w*")) {
-                info();
-            }
-            else if (command.matches("\\s*show\\s*\\w*")) {
-                show();
-            }
-            else if (command.matches("\\s*add\\s*\\w*")) {
-                try {
-                    add();
-                } catch (OperationCanceledException operationCanceled) {
-                    System.out.println(operationCanceled.getMessage());
-                }
-            }
-            else if (command.matches("\\s*update\\s+[0-9]+\\s*")){
-                updateById(command);
-            }
-            else if (command.matches("\\s*remove_by_id\\s+[0-9]+\\s*")){
-                remove(command);
-            }
-            else if (command.matches("\\s*clear\\s*\\w*")){
-                clear();
-            }
-            else if (command.matches("\\s*save\\s*\\w*")){
-                save();
-            }
-            else if (command.matches("\\s*execute_script\\s+\\w+\\s*")){
-                executeScript(command);
-            }
-            else if (command.matches("\\s*exit\\s*\\w*")) {
-                System.out.println("Exiting...");
-                return;
-            }
-            else if (command.matches("\\s*")) {
-                ;//do nothing if spaces are typed in
-            }
-            else {
-                System.out.println("Invalid command");
-            }
-        }
-    }*/
 
     public void readFromTerminal(){
         //cancelling if not initialized
@@ -176,11 +114,14 @@ public class DataBase {
                     case ADD_IF_MAX:
                         //todo
                     case REMOVE_GREATER:
-                        //todo
+                        removeGreater(command);
+                        break;
                     case REMOVE_LOWER:
-                        //todo
+                        removeLower(command);
+                        break;
                     case GROUP_COUNTING_BY_POSITION:
-                        //todo
+                        groupCountingByPosition();
+                        break;
                     case COUNT_LESS_THAN_START_DATE:
                         //todo
                     case FILTER_GREATER_THAN_START_DATE:
@@ -455,5 +396,49 @@ public class DataBase {
         Terminal.changeScanner(this.terminal);
         //continue reading
         readFromTerminal();
+    }
+
+    protected void removeGreater(String commandWithSalary){
+        //removing spaces and "update" word to turn into long
+        commandWithSalary = Terminal.removeString(commandWithSalary, "remove_greater");
+        double salary = Double.parseDouble(commandWithSalary);
+
+        for (int i = 0; i < this.database.size(); i++) {
+            if (this.database.get(i).getSalary() > salary){
+                this.database.remove(i);
+            }
+        }
+
+        System.out.println("Workers with salary greater " + salary + " were successfully removed!");
+    }
+
+    protected void removeLower(String commandWithSalary){
+        //removing spaces and "update" word to turn into long
+        commandWithSalary = Terminal.removeString(commandWithSalary, "remove_lower");
+        double salary = Double.parseDouble(commandWithSalary);
+
+        for (int i = 0; i < this.database.size(); i++) {
+            if (this.database.get(i).getSalary() < salary){
+                this.database.remove(i);
+            }
+        }
+
+        System.out.println("Workers with salary lower " + salary + " were successfully removed!");
+    }
+
+    protected void groupCountingByPosition(){
+        StringBuilder sb = new StringBuilder();
+        for (Position p: Position.values()) {
+            System.out.println("-----------" + p.toString() + "-----------");
+            for (Worker worker : this.database) {
+                if (worker.getPosition() != null) {
+                    if (worker.getPosition().equals(p)){
+                        sb.append(worker.getName()).append(" ").append(worker.getId());
+                    }
+                }
+                System.out.println(sb.toString());
+                sb.delete(0, sb.length());
+            }
+        }
     }
 }
