@@ -56,6 +56,9 @@ public class DataBase {
         readFromTerminal();
     }
 
+    /**
+     * Initializing database (like constructor), but without a file (if it's not given)
+     */
     public void initialize(){
         //initializing variables
         this.database = new LinkedList<>();
