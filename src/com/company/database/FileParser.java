@@ -86,6 +86,8 @@ public class FileParser {
             double salary;
             String positionString;
             Position position;
+            Long height;
+            Integer weight;
 
             //counter of successfully added workers
             int successfullyAddedWorkers = 0;
@@ -109,17 +111,19 @@ public class FileParser {
                         continue;
                     }
 
+                    //adding position
                     positionString = eElement.getElementsByTagName("position").item(0).getTextContent();
+                    position = Position.findEnum(positionString);
 
-                    //todo adding
-                    if (Position.findEnum(positionString) != null){
-                        position = Position.findEnum(positionString);
-                        //database.add(new Worker(name, salary, position));
+                    //adding personal qualities
+                    if (eElement.getElementsByTagName("position").item(0).getTextContent().isEmpty()){
+                        height = null;
                     } else {
-                        System.out.println(name + "'s position is invalid: " + positionString);
-                        System.out.println("Worker was added without position");
-                        //database.add(new Worker(name, salary));
+                        height = Long.valueOf(eElement.getElementsByTagName("position").item(0).getTextContent());
                     }
+
+
+
                     successfullyAddedWorkers++;
                 }
             }

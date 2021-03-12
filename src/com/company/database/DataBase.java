@@ -88,11 +88,7 @@ public class DataBase {
                         show();
                         break;
                     case ADD:
-                        try {
-                            add();
-                        } catch (OperationCanceledException operationCanceledException) {
-                            System.out.println(operationCanceledException.getMessage());
-                        }
+                        add();
                         break;
                     case UPDATE:
                         updateById(command);
@@ -123,11 +119,16 @@ public class DataBase {
                         groupCountingByPosition();
                         break;
                     case COUNT_LESS_THAN_START_DATE:
-                        //todo
+                        countLessThanStartDate(command);
+                        break;
                     case FILTER_GREATER_THAN_START_DATE:
-                        //todo
+                        filterGreaterThanStartDate(command);
+                        break;
+                    default:
+                        System.out.println("Unknown command");
+                        break;
                 }
-            } catch (UnknownCommandException e) {
+            } catch (UnknownCommandException | OperationCanceledException e) {
                 System.out.println(e.getMessage());
             }
         }
@@ -142,7 +143,10 @@ public class DataBase {
 
         //parsing
         try {
-            this.database = FileParser.xmlToDatabase(filePath);
+            LinkedList<Worker> databaseFromXML = FileParser.xmlToDatabase(filePath);
+            if (databaseFromXML != null){
+                this.database = databaseFromXML;
+            }
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
@@ -198,8 +202,15 @@ public class DataBase {
                 }
                 break;
             case POSITION:
-                //todo write func to compare and get enum
                 System.out.println("Please, type the new position: ");
+                Position newPosition;
+                try {
+                    newPosition = Position.findEnum(Terminal.removeSpaces(Terminal.repeatInputAndExpectRegex("position", "\\s*\\w+\\s*")));
+                } catch (OperationCanceledException e) {
+                    System.out.println(e.getMessage());
+                    return;
+                }
+                this.database.get(index).setPosition(newPosition);
                 break;
             case PERSONALITY:
                 //todo
@@ -440,5 +451,43 @@ public class DataBase {
                 sb.delete(0, sb.length());
             }
         }
+    }
+
+    protected void countLessThanStartDate(String commandWithStartDate){
+        //removing spaces and "count_less_than_start_date" word to turn into date
+        commandWithStartDate = Terminal.removeString(commandWithStartDate, "count_less_than_start_date");
+        if (!commandWithStartDate.matches("\\s*(?!0000)(\\d{4})-(0[1-9]|1[0-2])-[0-3]\\d\\s*")){
+            System.out.println("Invalid date!");
+            return;
+        }
+
+        ZonedDateTime z = ZonedDateTime.parse(commandWithStartDate);
+
+        int counter = 0;
+        for (Worker w:this.database) {
+            if (w.getStartDate().isBefore(z)){
+                counter++;
+            }
+        }
+        System.out.println("There are " + counter + " workers with StartDate less than " + commandWithStartDate);
+    }
+
+    protected void filterGreaterThanStartDate(String commandWithStartDate){
+        //removing spaces and "count_less_than_start_date" word to turn into date
+        commandWithStartDate = Terminal.removeString(commandWithStartDate, "count_less_than_start_date");
+        if (!commandWithStartDate.matches("\\s*(?!0000)(\\d{4})-(0[1-9]|1[0-2])-[0-3]\\d\\s*")){
+            System.out.println("Invalid date!");
+            return;
+        }
+
+        ZonedDateTime z = ZonedDateTime.parse(commandWithStartDate);
+
+        System.out.println("-----Workers with date after " + commandWithStartDate + " -----");
+        for (Worker w:this.database) {
+            if (w.getStartDate().isAfter(z)){
+                System.out.println(w.getName() + " " + w.getId());
+            }
+        }
+        System.out.println("-------------------------");
     }
 }

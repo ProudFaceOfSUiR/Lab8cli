@@ -8,6 +8,7 @@ import com.company.exceptions.OperationCanceledException;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Objects;
@@ -19,8 +20,14 @@ public class WorkerBuilder {
 
     private Worker worker;
 
-    public WorkerBuilder() {
-        worker = new Worker();
+    //public methods
+
+    public WorkerBuilder(){
+        try {
+            worker = new Worker("Default", 1, null, null, new Coordinates(0, 0), ZonedDateTime.now(), null);
+        } catch (InvalidDataException e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     public Worker newWorker() throws InvalidDataException, OperationCanceledException{
@@ -33,45 +40,31 @@ public class WorkerBuilder {
         return new Worker(worker.getName(),worker.getSalary(), worker.getPosition(), worker.getPerson(), worker.getCoordinates(), worker.getStartDate(), worker.getEndDate());
     }
 
+    //protected methods for terminal input
+
     protected void setName() throws InvalidDataException, OperationCanceledException{
         System.out.print("Please, write the name of a new worker: ");
-        try {
-            try {
-                worker.setName(
-                        Terminal.removeSpaces(
-                            Terminal.repeatInputAndExpectRegex("name", "\\s*\\w+\\s*")
-                        )
-                    );
-            } catch (OperationCanceledException e) {
-                throw e;
-            }
-        } catch (InvalidDataException e) {
-            throw e;
-        }
+        worker.setName(
+                Terminal.removeSpaces(
+                    Terminal.repeatInputAndExpectRegex("name", "\\s*\\w+\\s*")
+                )
+            );
     }
 
     protected void setSalary() throws InvalidDataException, OperationCanceledException{
         System.out.print("PLease, input " + worker.getName() + "'s salary: ");
-        try {
-            worker.setSalary(
-                    Double.parseDouble(
-                        Terminal.removeSpaces(
-                            Terminal.repeatInputAndExpectRegex("salary", "\\s*\\d+\\.*\\d*\\s*"))
-                    )
-                );
-        } catch (OperationCanceledException e) {
-            throw e;
-        }
+        worker.setSalary(
+                Double.parseDouble(
+                    Terminal.removeSpaces(
+                        Terminal.repeatInputAndExpectRegex("salary", "\\s*\\d+\\.*\\d*\\s*"))
+                )
+            );
     }
 
     //todo invalid position
     protected void setPosition() throws OperationCanceledException{
         System.out.println("Please, write " + worker.getName() + "'s position " + Arrays.toString(Arrays.stream(Position.getPositions()).toArray()) + ": ");
-        try {
-            worker.setPosition(Position.findEnum(Terminal.repeatInputAndExpectRegexOrNull("position","\\s*\\w+\\s*")));
-        } catch (OperationCanceledException e) {
-            throw e;
-        }
+        worker.setPosition(Position.findEnum(Terminal.repeatInputAndExpectRegexOrNull("position","\\s*\\w+\\s*")));
     }
 
     protected void setPersonality(){
@@ -94,7 +87,7 @@ public class WorkerBuilder {
 
     protected void setCoordinates() throws InvalidDataException, OperationCanceledException{
         System.out.println("PLease, input " + worker.getName() + "'s coordinates");
-        Coordinates c = new Coordinates();
+        Coordinates c = new Coordinates(0,0);
 
         try {
             System.out.print("X = ");

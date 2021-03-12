@@ -17,21 +17,12 @@ public class Worker {
     private Position position; //Поле может быть null
     private Person person; //Поле может быть null
 
-    public Worker() {}
-
     public Worker(String name, double salary, Position position, Person person, Coordinates coordinates,
                    ZonedDateTime startDate, ZonedDateTime endDate) throws InvalidDataException{
-        try {
-            setName(name);
-        } catch (InvalidDataException e) {
-            throw e;
-        }
-        try {
-            setSalary(salary);
-        } catch (InvalidDataException e) {
-            throw e;
-        }
+        setName(name);
+        setSalary(salary);
 
+        //todo
         this.coordinates = coordinates;
         this.startDate = startDate;
         this.endDate = endDate;
@@ -44,6 +35,16 @@ public class Worker {
         this.id = Math.abs(Long.parseLong(String.valueOf(random.nextLong() + creationDate.getSecond() + creationDate.getMinute() + creationDate.getHour()).substring(0,10)));
 
     }
+
+
+    //private constructor for WorkerBuilder
+    private Worker(){}
+
+    public static class WorkerBuilderFromTerminal {
+
+    }
+
+    //getters and setters
 
     public Long getId() {
         return id;
