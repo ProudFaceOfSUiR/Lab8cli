@@ -47,7 +47,7 @@ public enum Commands {
         String[] commands = new String[Commands.values().length];
         Commands[] commandsEnum = values();
         for (int i = 0; i < Commands.values().length; i++) {
-            if (commandsEnum[i].getArgument() != ""){
+            if (!commandsEnum[i].getArgument().equals("")){
                 commands[i] = commandsEnum[i].toString() + " " + commandsEnum[i].getArgument() + ": " + commandsEnum[i].getDescription();
             } else {
                 commands[i] = commandsEnum[i].toString() + ": " + commandsEnum[i].getDescription();

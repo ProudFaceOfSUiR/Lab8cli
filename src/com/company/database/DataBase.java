@@ -12,9 +12,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.Scanner;
+import java.util.*;
 
 import com.company.enums.Commands;
 import com.company.enums.Position;
@@ -111,7 +109,7 @@ public class DataBase {
                     case EXIT:
                         System.exit(1);
                     case ADD_IF_MAX:
-                        //todo
+                        addIfMax();
                     case REMOVE_GREATER:
                         removeGreater(command);
                         break;
@@ -131,7 +129,7 @@ public class DataBase {
                         System.out.println("Unknown command");
                         break;
                 }
-            } catch (UnknownCommandException e) {
+            } catch (UnknownCommandException | OperationCanceledException e) {
                 System.out.println(e.getMessage());
             }
         }
@@ -158,7 +156,6 @@ public class DataBase {
     //protected methods
 
     protected int returnIndexById(long id){
-        //todo change on exception
         int index = -1;
         for (int i = 0; i < database.size(); i++) {
             if (database.get(i).getId() == id){
@@ -169,8 +166,7 @@ public class DataBase {
         return index;
     }
 
-    //todo catch EOF
-    protected void updateFields(int index){
+    protected void updateFields(int index) throws OperationCanceledException{
         //checking if element exists
         if (database.get(index) == null){
             System.out.println("Invalid index!");
@@ -180,9 +176,14 @@ public class DataBase {
         //choosing the field to update
         System.out.println("Which field would you like to update: " + Arrays.toString(Arrays.stream(Fields.getFields()).toArray()) + " ?");
         String choice;
-        while (!Fields.isEnum(choice = terminal.nextLine())){
-            System.out.println("Incorrect field. Try again: ");
+        try {
+            while (!Fields.isEnum(choice = terminal.nextLine())){
+                System.out.println("Incorrect field. Try again: ");
+            }
+        } catch (NoSuchElementException e) {
+            throw new OperationCanceledException();
         }
+
         Fields field = Fields.findEnum(choice);
 
         //updating chosen field
@@ -208,7 +209,7 @@ public class DataBase {
                 System.out.println(field.toString() + " has been successfully updated!");
                 break;
             case POSITION:
-                System.out.println("Please, type the new position: ");
+                System.out.println("Please, type the new position " + Arrays.toString(Position.values()) + ": ");
                 Position newPosition;
                 try {
                     newPosition = Position.findEnum(Terminal.removeSpaces(Terminal.repeatInputAndExpectRegexOrNull("position", "\\s*\\w+\\s*")));
@@ -234,6 +235,7 @@ public class DataBase {
                 } catch (Exception e){
                     //pass
                 }
+
                 this.database.get(index).setPerson(person);
                 System.out.println(field.toString() + " has been successfully updated!");
                 break;
@@ -258,6 +260,7 @@ public class DataBase {
                     return;
                 }
 
+                this.database.get(index).setCoordinates(c);
                 System.out.println(field.toString() + " has been successfully updated!");
                 break;
             case STARTDATE:
@@ -292,7 +295,6 @@ public class DataBase {
                     this.database.get(index).setEndDate(null);
                 } else {
                     date = LocalDate.parse(enddate, formatter);
-
                     this.database.get(index).setEndDate(date.atStartOfDay(ZoneId.systemDefault()));
                 }
 
@@ -304,9 +306,13 @@ public class DataBase {
 
     //terminal commands
 
-    protected void updateById(String commandWithID){
+    protected void updateById(String commandWithID) throws OperationCanceledException {
         //removing spaces and "update" word to turn into long
         commandWithID = Terminal.removeString(commandWithID, "update");
+        if (commandWithID.isEmpty() || !commandWithID.matches("\\d+")){
+            System.out.println("Invalid id");
+            return;
+        }
         long id = Long.parseLong(commandWithID);
 
         //trying to find element
@@ -342,28 +348,44 @@ public class DataBase {
             return;
         }
         System.out.println("------------------------------------");
-        System.out.println("Name | id | Salary | Position | Personality | Coordinates | Dates");
-        String sout;
-        StringBuilder sb = new StringBuilder();
+        List<List<String>> rows = new ArrayList<>();
+        List<String> headers = Arrays.asList("Name", "id", "Salary", "Position", "Personality", "Coordinates", "Start Date", "End Date");
+        rows.add(headers);
+        StringBuilder coord = new StringBuilder();
+        ArrayList<String> sb = new ArrayList<>();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         for (Worker worker : database) {
-            sb.append(worker.getName()).append(" | ").append(worker.getId()).append(" | ").append(worker.getSalary()).append(" | ");
+            sb.add(worker.getName());sb.add(String.valueOf(worker.getId()));sb.add(String.valueOf(worker.getSalary()));
 
+            //adding position
             if (worker.getPosition() != null){
-                sb.append(worker.getPosition().toString()).append(" | ");
+                sb.add(worker.getPosition().toString());
+            } else {
+                sb.add("null");
             }
 
-            if (worker.getPerson().getHeight() != null){
-                sb.append(worker.getPerson().getHeight()).append(" | ");
-            }
-            if (worker.getPerson().getWeight() != null){
-                sb.append(worker.getPerson().getWeight()).append(" | ");
+            //adding personality
+            if (worker.getPerson() != null) {
+                sb.add(worker.getPerson().getHeight() + ", " + worker.getPerson().getWeight());
+            } else {
+                sb.add("null");
             }
 
-            sb.append(worker.getCoordinates().getX()).append(" | ");
+            coord.append(worker.getCoordinates().getX()).append(", ").append(worker.getCoordinates().getY());
+            sb.add(coord.toString());
+            coord.delete(0, coord.length());
 
-            System.out.println(sb.toString());
-            sb.delete(0, sb.length());
+            sb.add(worker.getStartDate().format(formatter));
+            if (worker.getEndDate() != null){
+                sb.add(worker.getEndDate().format(formatter));
+            } else {
+                sb.add("null");
+            }
+
+            rows.add((List<String>) sb.clone());
+            sb.clear();
         }
+        System.out.println(Terminal.formatAsTable(rows));
         System.out.println("------------------------------------");
     }
 
@@ -533,7 +555,9 @@ public class DataBase {
             return;
         }
 
-        ZonedDateTime z = ZonedDateTime.parse(commandWithStartDate);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate date = LocalDate.parse(commandWithStartDate, formatter);
+        ZonedDateTime z = date.atStartOfDay(ZoneId.systemDefault());
 
         int counter = 0;
         for (Worker w:this.database) {
@@ -546,13 +570,15 @@ public class DataBase {
 
     protected void filterGreaterThanStartDate(String commandWithStartDate){
         //removing spaces and "count_less_than_start_date" word to turn into date
-        commandWithStartDate = Terminal.removeString(commandWithStartDate, "count_less_than_start_date");
+        commandWithStartDate = Terminal.removeString(commandWithStartDate, "filter_greater_than_start_date");
         if (!commandWithStartDate.matches("\\s*(?!0000)(\\d{4})-(0[1-9]|1[0-2])-[0-3]\\d\\s*")){
             System.out.println("Invalid date!");
             return;
         }
 
-        ZonedDateTime z = ZonedDateTime.parse(commandWithStartDate);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate date = LocalDate.parse(commandWithStartDate, formatter);
+        ZonedDateTime z = date.atStartOfDay(ZoneId.systemDefault());
 
         System.out.println("-----Workers with date after " + commandWithStartDate + " -----");
         for (Worker w:this.database) {
@@ -561,5 +587,18 @@ public class DataBase {
             }
         }
         System.out.println("-------------------------");
+    }
+
+    protected void addIfMax(){
+        Worker newWorker = new Worker.WorkerBuilderFromTerminal().build();
+
+        for (Worker w: this.database) {
+            if (w.getSalary() > newWorker.getSalary()){
+                System.out.println("New worker hasn't got the max salary!");
+                return;
+            }
+        }
+
+        this.database.add(newWorker);
     }
 }

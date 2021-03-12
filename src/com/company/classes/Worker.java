@@ -28,7 +28,6 @@ public class Worker {
         setName(name);
         setSalary(salary);
 
-        //todo
         this.coordinates = coordinates;
         this.startDate = startDate;
         this.endDate = endDate;
@@ -96,7 +95,6 @@ public class Worker {
             );
         }
 
-        //todo invalid position
         protected void setPosition() throws OperationCanceledException{
             System.out.println("Please, write " + worker.getName() + "'s position " + Arrays.toString(Arrays.stream(Position.getPositions()).toArray()) + ": ");
             worker.setPosition(Position.findEnum(Terminal.repeatInputAndExpectRegexOrNull("position","\\s*\\w+\\s*")));

@@ -51,11 +51,7 @@ public class FileParser {
         //check if file exists
         if (alreadyExistCheck(filePath)) {
             //giving the choice
-            try {
-                return Terminal.binaryChoice("overwrite the existing file");
-            } catch (OperationCanceledException e) {
-                throw e;
-            }
+            return Terminal.binaryChoice("overwrite the existing file");
         } else return true; //"overwriting" nonexistent file
     }
 
@@ -97,8 +93,6 @@ public class FileParser {
 
             //personality
             Person person = null;
-            Long height;
-            Integer weight;
 
             //coordinates
             Coordinates coordinates;

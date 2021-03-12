@@ -5,6 +5,7 @@ import com.company.exceptions.OperationCanceledException;
 import com.company.exceptions.UnknownCommandException;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
@@ -94,10 +95,38 @@ public class Terminal {
     public static Commands matchCommand(String input) throws UnknownCommandException{
         input = input.toLowerCase();
         for (Commands c: Commands.values()) {
-            if (input.matches("\\s*" + c.toString().toLowerCase() + "\\s*\\w*") || input.matches("\\s*" + c.toString().toLowerCase() + "\\s+[0-9]+\\s*")){
+            if (input.matches("\\s*" + c.toString().toLowerCase() + "\\s*\\w*")
+                    || input.matches("\\s*" + c.toString().toLowerCase() + "\\s+[0-9]+\\s*")
+                    || input.matches("\\s*" + c.toString().toLowerCase() + "\\s*(?!0000)(\\d{4})-(0[1-9]|1[0-2])-[0-3]\\d\\s*")){
                 return c;
             }
         }
         throw new UnknownCommandException();
+    }
+
+    public static String formatAsTable(List<List<String>> rows)
+    {
+        int[] maxLengths = new int[rows.get(0).size()];
+        for (List<String> row : rows)
+        {
+            for (int i = 0; i < row.size(); i++)
+            {
+                maxLengths[i] = Math.max(maxLengths[i], row.get(i).length());
+            }
+        }
+
+        StringBuilder formatBuilder = new StringBuilder();
+        for (int maxLength : maxLengths)
+        {
+            formatBuilder.append("%-").append(maxLength + 2).append("s");
+        }
+        String format = formatBuilder.toString();
+
+        StringBuilder result = new StringBuilder();
+        for (List<String> row : rows)
+        {
+            result.append(String.format(format, row.toArray(new String[0]))).append("\n");
+        }
+        return result.toString();
     }
 }
