@@ -35,6 +35,10 @@ public class DataBase {
 
     //public methods
 
+    /**
+     * Initializing database (like constructor)
+     * @param filePath
+     */
     public void initialize(String filePath){
         //initializing variables
         this.database = new LinkedList<>();
@@ -52,6 +56,9 @@ public class DataBase {
         readFromTerminal();
     }
 
+    /**
+     * Main input from console(terminal)
+     */
     public void readFromTerminal(){
         //cancelling if not initialized
         if(!isInitialized){
@@ -108,8 +115,10 @@ public class DataBase {
                         break;
                     case EXIT:
                         System.exit(1);
+                        break;
                     case ADD_IF_MAX:
                         addIfMax();
+                        break;
                     case REMOVE_GREATER:
                         removeGreater(command);
                         break;
@@ -135,6 +144,10 @@ public class DataBase {
         }
     }
 
+    /**
+     * Reader from given file.
+     * @param filePath
+     */
     public void readFromFile(String filePath){
         //cancelling if not initialized
         if(!isInitialized){
@@ -155,6 +168,11 @@ public class DataBase {
 
     //protected methods
 
+    /**
+     * Returns index in database by id
+     * @param id
+     * @return
+     */
     protected int returnIndexById(long id){
         int index = -1;
         for (int i = 0; i < database.size(); i++) {
@@ -166,6 +184,11 @@ public class DataBase {
         return index;
     }
 
+    /**
+     * The whole code of updating feilds
+     * @param index
+     * @throws OperationCanceledException
+     */
     protected void updateFields(int index) throws OperationCanceledException{
         //checking if element exists
         if (database.get(index) == null){
@@ -306,6 +329,11 @@ public class DataBase {
 
     //terminal commands
 
+    /**
+     * small version of update_by_id command - excluding the updating process
+     * @param commandWithID
+     * @throws OperationCanceledException
+     */
     protected void updateById(String commandWithID) throws OperationCanceledException {
         //removing spaces and "update" word to turn into long
         commandWithID = Terminal.removeString(commandWithID, "update");

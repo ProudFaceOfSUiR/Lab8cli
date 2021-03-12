@@ -56,6 +56,11 @@ public enum Commands {
         return commands;
     }
 
+    /**
+     * Finds enum from string
+     * @param s
+     * @return
+     */
     public static Commands findEnum(String s){
         s = s.toUpperCase();
         Commands command = null;
@@ -67,6 +72,11 @@ public enum Commands {
         return command;
     }
 
+    /**
+     * Checks if string is similar to enum
+     * @param s
+     * @return
+     */
     public static boolean isEnum(String s){
         s = s.toUpperCase();
         for (int i = 0; i < values().length; i++) {

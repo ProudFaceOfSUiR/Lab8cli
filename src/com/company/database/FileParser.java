@@ -26,6 +26,11 @@ import java.util.LinkedList;
 
 public class FileParser {
 
+    /**
+     * Check if file path is valid
+     * @param filePath
+     * @return
+     */
     public static boolean pathCheck(String filePath){
         if (!filePath.matches("\\s*[A-Z]:/(\\w*/)*\\w+.xml")){
             System.out.println(filePath);
@@ -35,6 +40,11 @@ public class FileParser {
         return true;
     }
 
+    /**
+     * Checks if we have permissions to read file
+     * @param filePath
+     * @return
+     */
     public static boolean permissionToReadCheck(Path filePath){
         if (!Files.isReadable((filePath))){
             System.out.println("File is restricted from editing.");
@@ -42,11 +52,22 @@ public class FileParser {
         } else return true;
     }
 
+    /**
+     * Checks if file already exists
+     * @param filePath
+     * @return
+     */
     public static boolean alreadyExistCheck(String filePath) {
         File f = new File(filePath);
         return f.exists() && !f.isDirectory();
     }
 
+    /**
+     * question if we want to overwrite file
+     * @param filePath
+     * @return
+     * @throws OperationCanceledException
+     */
     public static boolean overWriteFile(String filePath) throws OperationCanceledException{
         //check if file exists
         if (alreadyExistCheck(filePath)) {
@@ -55,6 +76,11 @@ public class FileParser {
         } else return true; //"overwriting" nonexistent file
     }
 
+    /**
+     * Gives path from class Path from string with path
+     * @param path
+     * @return
+     */
     public static Path getPath(String path){
         Path p = Paths.get(path);
         if (Files.notExists(p)){
@@ -63,6 +89,12 @@ public class FileParser {
         } else return p;
     }
 
+    /**
+     * Parses XML file to LinkedList database
+     * @param filepath
+     * @return
+     * @throws Exception
+     */
     public static LinkedList<Worker> xmlToDatabase(String filepath) throws Exception{
 
         if (!pathCheck(filepath)){
@@ -231,6 +263,11 @@ public class FileParser {
         }
     }
 
+    /**
+     * Makes a big string with the whole database
+     * @param database
+     * @return
+     */
     public static String dataBaseToString(LinkedList<Worker> database){
         StringBuilder sb = new StringBuilder();
 
@@ -238,6 +275,7 @@ public class FileParser {
         sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>").append("\n");
         sb.append("<database>").append("\n");
 
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         //writing workers
         for (Worker w: database) {
             sb.append("\t").append("<worker>").append("\n");
@@ -249,6 +287,14 @@ public class FileParser {
                 sb.append("\t\t").append("<position>").append(w.getPosition().toString()).append("</position>").append("\n");
             }
 
+            sb.append("\t\t").append("<coordinates>").append(w.getCoordinates().getX()).append(",").append(w.getCoordinates().getY()).append("</coordinates>").append("\n");
+
+            sb.append("\t\t").append("<startdate>").append(w.getStartDate().format(formatter)).append("</startdate>").append("\n");
+
+            if (w.getEndDate() != null){
+                sb.append("\t\t").append("<enddate>").append(w.getStartDate().format(formatter)).append("</enddate>").append("\n");
+            }
+
             sb.append("\t").append("</worker>").append("\n");
         }
 
@@ -256,6 +302,11 @@ public class FileParser {
         return sb.toString();
     }
 
+    /**
+     * Parses database to XML
+     * @param database
+     * @param filename
+     */
     public static void dataBasetoXML(String database, String filename){
         try {
             // Creates a FileWriter

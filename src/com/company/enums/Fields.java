@@ -19,6 +19,11 @@ public enum Fields {
         return fields;
     }
 
+    /**
+     * Finds enum from string
+     * @param s
+     * @return
+     */
     public static Fields findEnum(String s){
         s = s.toUpperCase();
         Fields field = null;
@@ -30,6 +35,11 @@ public enum Fields {
         return field;
     }
 
+    /**
+     * Checks if string is similar to enum
+     * @param s
+     * @return
+     */
     public static boolean isEnum(String s){
         s = s.toUpperCase();
         for (int i = 0; i < values().length; i++) {

@@ -7,6 +7,11 @@ public enum Position {
     BAKER,
     MANAGER_OF_CLEANING;
 
+    /**
+     * Finds enum from string
+     * @param s
+     * @return
+     */
     public static Position findEnum(String s){
         if (s == null){
             return null;
@@ -22,6 +27,11 @@ public enum Position {
         return position;
     }
 
+    /**
+     * Checks if string is similar to enum
+     * @param s
+     * @return
+     */
     public static boolean isEnum(String s){
         s = s.toUpperCase();
         for (int i = 0; i < values().length; i++) {

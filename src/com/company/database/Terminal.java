@@ -12,10 +12,20 @@ import java.util.Scanner;
 public class Terminal {
     private static Scanner terminal = new Scanner(System.in);
 
+    /**
+     * Changes scanner (it's needed when we execute script
+     * @param s
+     */
     public static void changeScanner(Scanner s){
         Terminal.terminal = s;
     }
 
+    /**
+     * Removes given string from input
+     * @param input
+     * @param string
+     * @return
+     */
     public static String removeString(String input, String string){
         if (input == null){
             return null;
@@ -29,6 +39,11 @@ public class Terminal {
         return output;
     }
 
+    /**
+     * Removes spaces and tabs from string
+     * @param input
+     * @return
+     */
     public static String removeSpaces(String input){
         if (input == null){
             return null;
@@ -41,6 +56,12 @@ public class Terminal {
         return output;
     }
 
+    /**
+     * Gives user a choice YES or NO
+     * @param move
+     * @return
+     * @throws OperationCanceledException
+     */
     public static boolean binaryChoice(String move) throws OperationCanceledException{
         System.out.println("Do you want to " + move + "? (Yes/No)");
 
@@ -61,6 +82,13 @@ public class Terminal {
         return false;
     }
 
+    /**
+     * Repeats input until user inputs the right (matching regex) string
+     * @param waitFor
+     * @param expectedRegex
+     * @return
+     * @throws OperationCanceledException
+     */
     public static String repeatInputAndExpectRegex(String waitFor, String expectedRegex) throws OperationCanceledException {
         String output;
         try {
@@ -76,6 +104,13 @@ public class Terminal {
         return output;
     }
 
+    /**
+     * Repeats input until user inputs the right (matching regex) string or null (empty line)
+     * @param waitFor
+     * @param expectedRegex
+     * @return
+     * @throws OperationCanceledException
+     */
     public static String repeatInputAndExpectRegexOrNull(String waitFor, String expectedRegex) throws OperationCanceledException {
         String output;
         try {
@@ -92,6 +127,12 @@ public class Terminal {
         } else return output;
     }
 
+    /**
+     * Finds the command (from Commands) from string
+     * @param input
+     * @return
+     * @throws UnknownCommandException
+     */
     public static Commands matchCommand(String input) throws UnknownCommandException{
         input = input.toLowerCase();
         for (Commands c: Commands.values()) {
@@ -107,6 +148,11 @@ public class Terminal {
         throw new UnknownCommandException();
     }
 
+    /**
+     * Formatter data as table
+     * @param rows
+     * @return
+     */
     public static String formatAsTable(List<List<String>> rows)
     {
         int[] maxLengths = new int[rows.get(0).size()];

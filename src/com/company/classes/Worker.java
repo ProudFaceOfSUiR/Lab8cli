@@ -52,6 +52,9 @@ public class Worker {
                 .substring(0,10)));
     }
 
+    /**
+     * Builder for terminal input. Includes all the souts etc
+     */
     public static class WorkerBuilderFromTerminal {
 
         private Worker worker = new Worker();
