@@ -16,6 +16,10 @@ public class Main {
 
     public static void main(String[] args) {
         DataBase dataBase = new DataBase();
-        dataBase.initialize(args[0]);
+        if (args.length == 0){
+            dataBase.initialize();
+        } else {
+            dataBase.initialize(args[0]);
+        }
     }
 }

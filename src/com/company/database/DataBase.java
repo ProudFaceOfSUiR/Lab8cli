@@ -56,6 +56,21 @@ public class DataBase {
         readFromTerminal();
     }
 
+    public void initialize(){
+        //initializing variables
+        this.database = new LinkedList<>();
+        this.terminal = new Scanner(System.in);
+        this.initializationTime = ZonedDateTime.now();
+        this.recursionCounter = 0;
+        this.scriptName = "";
+        this.isInitialized = true;
+
+        System.out.println("Database has been initialized without file");
+        System.out.println("------------------------------------");
+
+        readFromTerminal();
+    }
+
     /**
      * Main input from console(terminal)
      */
