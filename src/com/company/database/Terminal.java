@@ -98,6 +98,9 @@ public class Terminal {
             if (input.matches("\\s*" + c.toString().toLowerCase() + "\\s*\\w*")
                     || input.matches("\\s*" + c.toString().toLowerCase() + "\\s+[0-9]+\\s*")
                     || input.matches("\\s*" + c.toString().toLowerCase() + "\\s*(?!0000)(\\d{4})-(0[1-9]|1[0-2])-[0-3]\\d\\s*")){
+                if (Terminal.removeSpaces(input).matches(Commands.ADD_IF_MAX.toString().toLowerCase())){
+                    return Commands.ADD_IF_MAX;
+                }
                 return c;
             }
         }
