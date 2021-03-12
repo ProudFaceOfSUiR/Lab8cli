@@ -1,5 +1,7 @@
 package com.company.database;
 
+import com.company.classes.Coordinates;
+import com.company.classes.Person;
 import com.company.classes.Worker;
 import com.company.enums.Position;
 import com.company.exceptions.OperationCanceledException;
@@ -16,6 +18,10 @@ import java.io.FileWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.LinkedList;
 
 public class FileParser {
@@ -84,10 +90,23 @@ public class FileParser {
             //fields of a worker
             String name;
             double salary;
+
+            //position
             String positionString;
             Position position;
+
+            //personality
+            Person person = null;
             Long height;
             Integer weight;
+
+            //coordinates
+            Coordinates coordinates;
+
+            //dates
+            ZonedDateTime startdate;
+            ZonedDateTime endDate = null;
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
             //counter of successfully added workers
             int successfullyAddedWorkers = 0;
@@ -97,34 +116,114 @@ public class FileParser {
 
                 if (nNode.getNodeType() == Node.ELEMENT_NODE) {
                     Element eElement = (Element) nNode;
-                    name = eElement.getElementsByTagName("name").item(0).getTextContent();
+                    name = Terminal.removeSpaces(eElement.getElementsByTagName("name").item(0).getTextContent());
 
-                    if (name.matches("\\s*")){
+                    //adding name
+                    if (name.matches("\\s*")) {
                         System.out.println("Invalid name. Couldn't add worker");
                         continue;
                     }
 
-                    if (eElement.getElementsByTagName("salary").item(0).getTextContent().matches("\\s*[0-9]+.*[0-9]*\\s*")){
-                        salary = Double.parseDouble(eElement.getElementsByTagName("salary").item(0).getTextContent() );
-                    } else {
-                        System.out.println(name + "'s salary is invalid. Couldn't add worker");
+                    //addding salary
+                    try {
+                        if (eElement.getElementsByTagName("salary").item(0).getTextContent().matches("\\s*[0-9]+.*[0-9]*\\s*")) {
+                            salary = Double.parseDouble(Terminal.removeSpaces(eElement.getElementsByTagName("salary").item(0).getTextContent()));
+                        } else {
+                            System.out.println(name + "'s salary is invalid. Couldn't add worker");
+                            continue;
+                        }
+                    } catch (Exception e){
+                        System.out.println("Something went wrong with the " + name +  "'s salary: " + e.getMessage());
                         continue;
                     }
 
-                    //adding position
-                    positionString = eElement.getElementsByTagName("position").item(0).getTextContent();
-                    position = Position.findEnum(positionString);
-
-                    //adding personal qualities
-                    if (eElement.getElementsByTagName("position").item(0).getTextContent().isEmpty()){
-                        height = null;
-                    } else {
-                        height = Long.valueOf(eElement.getElementsByTagName("position").item(0).getTextContent());
+                    try {
+                        //adding position
+                        positionString = eElement.getElementsByTagName("position").item(0).getTextContent();
+                        position = Position.findEnum(positionString);
+                    } catch (Exception e){
+                        System.out.println("Something went wrong with the " + name + "'s position: " + e.getMessage());
+                        continue;
                     }
 
+                    try {
+                        //adding personal qualities
+                        if (eElement.getElementsByTagName("person").item(0).getTextContent().isEmpty() ||
+                                !eElement.getElementsByTagName("person").item(0).getTextContent().matches("\\s*\\d+,\\d+\\s*")) {
+                            //do nothing cause person is already null
+                        } else {
+                            String[] heightWeight = eElement.getElementsByTagName("person").item(0).getTextContent().split(",");
+                            person = new Person(Long.valueOf(Terminal.removeSpaces(heightWeight[0])), Integer.valueOf(Terminal.removeSpaces(heightWeight[1])));
+                        }
+                    }catch (NullPointerException e){
+                        person = null;
+                    }
+                    catch (Exception e){
+                        System.out.println("Something went wrong with the " + name + "'s personality: " + e.getMessage());
+                        continue;
+                    }
 
+                    try {
+                        //adding coordinates
+                        if (eElement.getElementsByTagName("coordinates").item(0).getTextContent().isEmpty() ||
+                                !eElement.getElementsByTagName("coordinates").item(0).getTextContent().matches("\\s*\\d+,\\d+\\s*")) {
+                            System.out.println("Invalid coordinates. Couldn't add worker");
+                            continue;
+                        } else {
+                            String[] xy = eElement.getElementsByTagName("coordinates").item(0).getTextContent().split(",");
+                            coordinates = new Coordinates(Long.parseLong(Terminal.removeSpaces(xy[0])), Integer.valueOf(Terminal.removeSpaces(xy[1])));
+                        }
+                    } catch (Exception e){
+                        System.out.println("Something went wrong with the " + name + "'s coordinates: " + e.getMessage());
+                        continue;
+                    }
 
-                    successfullyAddedWorkers++;
+                    try {
+                        //adding start date
+                        if (eElement.getElementsByTagName("startdate").item(0).getTextContent().isEmpty() ||
+                                !eElement.getElementsByTagName("startdate").item(0).getTextContent().matches("\\s*(?!0000)(\\d{4})-(0[1-9]|1[0-2])-[0-3]\\d\\s*")) {
+                            System.out.println("Invalid startDate. Couldn't add worker");
+                            continue;
+                        } else {
+                            LocalDate date = LocalDate.parse(
+                                    Terminal.removeSpaces(
+                                            eElement.getElementsByTagName("startdate").item(0).getTextContent()),
+                                    formatter);
+                            startdate = date.atStartOfDay(ZoneId.systemDefault());
+                        }
+                    } catch (Exception e){
+                        System.out.println("Something went wrong with the " + name + "'s startdate: " + e.getMessage());
+                        continue;
+                    }
+
+                    try {
+                        //adding enddate
+                        if (!eElement.getElementsByTagName("enddate").item(0).getTextContent().isEmpty() &&
+                                !eElement.getElementsByTagName("enddate").item(0).getTextContent().matches("\\s*(?!0000)(\\d{4})-(0[1-9]|1[0-2])-[0-3]\\d\\s*")) {
+                            System.out.println("Invalid endDate. Couldn't add worker");
+                            continue;
+                        } else if (eElement.getElementsByTagName("enddate").item(0).getTextContent().matches("\\s*(?!0000)(\\d{4})-(0[1-9]|1[0-2])-[0-3]\\d\\s*")) {
+                            LocalDate date = LocalDate.parse(
+                                    Terminal.removeSpaces(
+                                            eElement.getElementsByTagName("enddate").item(0).getTextContent()),
+                                    formatter);
+                            endDate = date.atStartOfDay(ZoneId.systemDefault());
+                        }
+                    } catch (NullPointerException e){
+                        endDate = null;
+                    }
+                    catch (Exception e){
+                        System.out.println("Something went wrong with the " + name + "'s enddate: " + e.getMessage());
+                        continue;
+                    }
+
+                    try {
+                        //adding worker
+                        database.add(new Worker(name, salary, position, person, coordinates, startdate, endDate));
+                        successfullyAddedWorkers++;
+                    } catch (Exception e){
+                        System.out.println("Something went wrong while adding a new worker: " + e.getMessage());
+                    }
                 }
             }
 
@@ -132,7 +231,8 @@ public class FileParser {
             System.out.println("------------------------------------");
             return database;
         } catch (Exception e) {
-            System.out.println("Something went wrong :0");
+            System.out.println("Something went wrong :0 Operation cancelled");
+            System.out.println("Error: " + e.getMessage());
             return null;
         }
     }

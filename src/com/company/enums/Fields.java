@@ -4,7 +4,10 @@ public enum Fields {
     NAME,
     SALARY,
     POSITION,
-    PERSONALITY;
+    PERSONALITY,
+    COORDINATES,
+    STARTDATE,
+    ENDDATE;
 
     public static String[] getFields()
     {

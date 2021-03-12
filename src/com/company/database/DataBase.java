@@ -1,11 +1,14 @@
 package com.company.database;
 
-import com.company.classes.WorkerBuilder;
+import com.company.classes.Coordinates;
+import com.company.classes.Person;
 import com.company.enums.Fields;
 import com.company.classes.Worker;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
@@ -128,7 +131,7 @@ public class DataBase {
                         System.out.println("Unknown command");
                         break;
                 }
-            } catch (UnknownCommandException | OperationCanceledException e) {
+            } catch (UnknownCommandException e) {
                 System.out.println(e.getMessage());
             }
         }
@@ -169,19 +172,20 @@ public class DataBase {
     //todo catch EOF
     protected void updateFields(int index){
         //checking if element exists
-        if (database.get(index) == null || index > database.size()){
+        if (database.get(index) == null){
             System.out.println("Invalid index!");
             return;
         }
 
-        //todo write loop
         //choosing the field to update
-        System.out.println("Which fields would you like to update: " + Arrays.toString(Arrays.stream(Fields.getFields()).toArray()) + " ?");
+        System.out.println("Which field would you like to update: " + Arrays.toString(Arrays.stream(Fields.getFields()).toArray()) + " ?");
         String choice;
         while (!Fields.isEnum(choice = terminal.nextLine())){
             System.out.println("Incorrect field. Try again: ");
         }
         Fields field = Fields.findEnum(choice);
+
+        //updating chosen field
         switch (field){
             case NAME:
                 System.out.println("Please, type the new name: ");
@@ -191,6 +195,7 @@ public class DataBase {
                     System.out.println(e.getMessage());
                     return;
                 }
+                System.out.println(field.toString() + " has been successfully updated!");
                 break;
             case SALARY:
                 System.out.println("Please, type the new salary: ");
@@ -200,20 +205,98 @@ public class DataBase {
                     System.out.println(e.getMessage());
                     return;
                 }
+                System.out.println(field.toString() + " has been successfully updated!");
                 break;
             case POSITION:
                 System.out.println("Please, type the new position: ");
                 Position newPosition;
                 try {
-                    newPosition = Position.findEnum(Terminal.removeSpaces(Terminal.repeatInputAndExpectRegex("position", "\\s*\\w+\\s*")));
+                    newPosition = Position.findEnum(Terminal.removeSpaces(Terminal.repeatInputAndExpectRegexOrNull("position", "\\s*\\w+\\s*")));
                 } catch (OperationCanceledException e) {
                     System.out.println(e.getMessage());
                     return;
                 }
                 this.database.get(index).setPosition(newPosition);
+                System.out.println(field.toString() + " has been successfully updated!");
                 break;
             case PERSONALITY:
-                //todo
+                System.out.println("PLease, type the new height: ");
+                Person person = new Person();
+                try {
+                    person.setHeight(Long.valueOf(Terminal.repeatInputAndExpectRegexOrNull("height", "\\s*[0-9]+\\s*")));
+                } catch (Exception e){
+                    //pass, because Person is already null
+                }
+
+                System.out.println("PLease, type the new weight: ");
+                try {
+                    person.setWeight((int) Long.parseLong(Terminal.repeatInputAndExpectRegexOrNull("weight", "\\s*[0-9]+\\s*")));
+                } catch (Exception e){
+                    //pass
+                }
+                this.database.get(index).setPerson(person);
+                System.out.println(field.toString() + " has been successfully updated!");
+                break;
+            case COORDINATES:
+                Coordinates c = new Coordinates(0,0);
+
+                try {
+                    System.out.print("X = ");
+                    c.setX(
+                            Long.parseLong(Terminal.removeSpaces(
+                                    Terminal.repeatInputAndExpectRegex("x coordinate", "\\s*\\d+\\s*")
+                            ))
+                    );
+                    System.out.print("Y = ");
+                    c.setY((int)
+                            Long.parseLong(Terminal.removeSpaces(
+                                    Terminal.repeatInputAndExpectRegex("y coordinate", "\\s*\\d+\\s*")
+                            ))
+                    );
+                } catch (InvalidDataException | OperationCanceledException e) {
+                    System.out.println(e.getMessage());
+                    return;
+                }
+
+                System.out.println(field.toString() + " has been successfully updated!");
+                break;
+            case STARTDATE:
+                System.out.println("Please, write the new start day (yyyy-mm-dd): ");
+
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                LocalDate date;
+                try {
+                    date = LocalDate.parse(Terminal.removeSpaces(Terminal.repeatInputAndExpectRegex(
+                            "start day", "\\s*(?!0000)(\\d{4})-(0[1-9]|1[0-2])-[0-3]\\d\\s*")), formatter);
+                } catch (OperationCanceledException e) {
+                    System.out.println(e.getMessage());
+                    return;
+                }
+
+                this.database.get(index).setStartDate( date.atStartOfDay(ZoneId.systemDefault()) );
+                System.out.println(field.toString() + " has been successfully updated!");
+                break;
+            case ENDDATE:
+                formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                System.out.println("Please, write the new end day (yyyy-mm-dd): ");
+                String enddate;
+                try {
+                    enddate = Terminal.removeSpaces(
+                            Terminal.repeatInputAndExpectRegexOrNull("end day", "\\s*(?!0000)(\\d{4})-(0[1-9]|1[0-2])-[0-3]\\d\\s*")
+                    );
+                } catch (OperationCanceledException e) {
+                    System.out.println(e.getMessage());
+                    return;
+                }
+                if (enddate == null){
+                    this.database.get(index).setEndDate(null);
+                } else {
+                    date = LocalDate.parse(enddate, formatter);
+
+                    this.database.get(index).setEndDate(date.atStartOfDay(ZoneId.systemDefault()));
+                }
+
+                System.out.println(field.toString() + " has been successfully updated!");
                 break;
         }
         System.out.println("Worker was successfully updated!");
@@ -243,21 +326,12 @@ public class DataBase {
         System.out.println("------------------------------------");
     }
 
-    protected void add() throws OperationCanceledException {
-        WorkerBuilder wb = new WorkerBuilder();
-
-        Worker w = null;
-        try {
-            w = wb.newWorker();
-        } catch (InvalidDataException e) {
-            System.out.println(e.getMessage());
-            if (Terminal.binaryChoice("try to add worker again")){
-                add();
-            } else throw new OperationCanceledException();
-        }
+    protected void add() {
+        //creating
+        Worker newWorker = new Worker.WorkerBuilderFromTerminal().build();
 
         //adding to database
-        this.database.add(w);
+        this.database.add(newWorker);
         System.out.println("New worker was successfully added!");
     }
 
@@ -313,14 +387,13 @@ public class DataBase {
         } catch (OperationCanceledException e) {
             //catch EOF
             System.out.println(e.getMessage());
-            return;
         }
     }
 
     protected void save(){
         //input file name
         System.out.print("Please, type the name of a new file: ");
-        String newFilename = null;
+        String newFilename;
         try {
             newFilename = Terminal.removeSpaces(Terminal.repeatInputAndExpectRegex("filename", "\\s*\\w+\\s*")) + ".xml";
         } catch (OperationCanceledException e) {
@@ -357,7 +430,6 @@ public class DataBase {
             } catch (OperationCanceledException e) {
                 //catching EOF
                 System.out.println(e.getMessage());
-                return;
             }
         } else {
             System.out.println("Element not found");
