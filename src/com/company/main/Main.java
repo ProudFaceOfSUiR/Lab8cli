@@ -11,6 +11,9 @@ which path was given as an argument of the command line.
  */
 
 import com.company.database.DataBase;
+import com.company.database.FileParser;
+
+import java.nio.file.Path;
 
 public class Main {
 

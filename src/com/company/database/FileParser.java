@@ -32,8 +32,7 @@ public class FileParser {
      * @return
      */
     public static boolean pathCheck(String filePath){
-        if (!filePath.matches("\\s*[A-Z]:/(\\w*/)*\\w+.xml")){
-            System.out.println(filePath);
+        if (!filePath.matches("\\s*\\w+.xml")){
             System.out.println("Invalid path. Couldn't get file");
             return false;
         }
@@ -82,11 +81,18 @@ public class FileParser {
      * @return
      */
     public static Path getPath(String path){
-        Path p = Paths.get(path);
+        File f = new File(path);
+        Path p;
+        try {
+            p = f.toPath();
+        } catch (Exception e){
+            System.out.println(e.getMessage());
+            return null;
+        }
         if (Files.notExists(p)){
             System.out.println("File doesn't exist!");
             return null;
-        } else return p;
+        } else return p.normalize();
     }
 
     /**
@@ -98,6 +104,10 @@ public class FileParser {
     public static LinkedList<Worker> xmlToDatabase(String filepath) throws Exception{
 
         if (!pathCheck(filepath)){
+            throw new Exception("Invalid path. Operation cancelled");
+        }
+
+        if (getPath(filepath) == null){
             throw new Exception("Invalid path. Operation cancelled");
         }
 
