@@ -380,7 +380,14 @@ public class DataBase {
 
     protected void add() {
         //creating
-        Worker newWorker = new Worker.WorkerBuilderFromTerminal().build();
+        Worker newWorker = null;
+        try {
+            newWorker = new Worker.WorkerBuilderFromTerminal().build();
+        } catch (OperationCanceledException | InvalidDataException e) {
+            System.out.println(e.getMessage());
+            System.out.println("Couldn't add worker");
+            return;
+        }
 
         //adding to database
         this.database.add(newWorker);
@@ -636,7 +643,14 @@ public class DataBase {
     }
 
     protected void addIfMax(){
-        Worker newWorker = new Worker.WorkerBuilderFromTerminal().build();
+        Worker newWorker = null;
+        try {
+            newWorker = new Worker.WorkerBuilderFromTerminal().build();
+        } catch (OperationCanceledException | InvalidDataException e) {
+            System.out.println(e.getMessage());
+            System.out.println("Couldn't add worker");
+            return;
+        }
 
         for (Worker w: this.database) {
             if (w.getSalary() > newWorker.getSalary()){
