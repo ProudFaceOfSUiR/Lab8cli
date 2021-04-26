@@ -7,6 +7,7 @@ import com.company.classes.Worker;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -20,7 +21,10 @@ import com.company.exceptions.InvalidDataException;
 import com.company.exceptions.OperationCanceledException;
 import com.company.exceptions.UnknownCommandException;
 
-public class DataBase {
+public class DataBase implements Serializable {
+
+    private static final long serialVersionUID = 40L;
+
     private LinkedList<Worker> database;
     private Scanner terminal;
     private String scriptName;
@@ -51,9 +55,8 @@ public class DataBase {
         System.out.println("Database has been initialized");
         System.out.println("------------------------------------");
 
-        //reading from file and then from terminal
+        //reading from file
         readFromFile(filePath);
-        readFromTerminal();
     }
 
     /**
@@ -70,96 +73,6 @@ public class DataBase {
 
         System.out.println("Database has been initialized without file");
         System.out.println("------------------------------------");
-
-        readFromTerminal();
-    }
-
-    /**
-     * Main input from console(terminal)
-     */
-    public void readFromTerminal(){
-        //cancelling if not initialized
-        if(!isInitialized){
-            System.out.println("DataBase hasn't been initialized! Cancelling...");
-            return;
-        }
-
-        //reading from terminal and checking if command exist
-        String command;
-        while(true) {
-            //check when we read from file
-            if (!terminal.hasNext()) {
-                return;
-            }
-
-            //reading command
-            command = terminal.nextLine();
-            command = command.toLowerCase();
-
-            //skip empty line
-            if (command.matches("\\s")) continue;
-
-            try {
-                //getting command
-                Commands c = Terminal.matchCommand(command);
-
-                switch (c){
-                    case HELP:
-                        help();
-                        break;
-                    case INFO:
-                        info();
-                        break;
-                    case SHOW:
-                        show();
-                        break;
-                    case ADD:
-                        add();
-                        break;
-                    case UPDATE:
-                        updateById(command);
-                        break;
-                    case REMOVE_BY_ID:
-                        remove(command);
-                        break;
-                    case CLEAR:
-                        clear();
-                        break;
-                    case SAVE:
-                        save();
-                        break;
-                    case EXECUTE_SCRIPT:
-                        executeScript(command);
-                        break;
-                    case EXIT:
-                        System.exit(1);
-                        break;
-                    case ADD_IF_MAX:
-                        addIfMax();
-                        break;
-                    case REMOVE_GREATER:
-                        removeGreater(command);
-                        break;
-                    case REMOVE_LOWER:
-                        removeLower(command);
-                        break;
-                    case GROUP_COUNTING_BY_POSITION:
-                        groupCountingByPosition();
-                        break;
-                    case COUNT_LESS_THAN_START_DATE:
-                        countLessThanStartDate(command);
-                        break;
-                    case FILTER_GREATER_THAN_START_DATE:
-                        filterGreaterThanStartDate(command);
-                        break;
-                    default:
-                        System.out.println("Unknown command");
-                        break;
-                }
-            } catch (UnknownCommandException | OperationCanceledException e) {
-                System.out.println(e.getMessage());
-            }
-        }
     }
 
     /**
@@ -176,38 +89,28 @@ public class DataBase {
         //parsing
         try {
             LinkedList<Worker> databaseFromXML = FileParser.xmlToDatabase(filePath);
-            if (databaseFromXML != null){
+
+            if (!databaseFromXML.isEmpty()){
                 this.database = databaseFromXML;
+            } else {
+                System.out.println("Database wasn't filled.");
             }
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
     }
 
-    //protected methods
-
-    /**
-     * Returns index in database by id
-     * @param id
-     * @return
-     */
-    protected int returnIndexById(long id){
-        int index = -1;
-        for (int i = 0; i < database.size(); i++) {
-            if (database.get(i).getId() == id){
-                index = i;
-                break;
-            }
-        }
-        return index;
+    public LinkedList<Worker> getDatabase(){
+        return this.database;
     }
+
 
     /**
      * The whole code of updating feilds
      * @param index
      * @throws OperationCanceledException
      */
-    protected void updateFields(int index) throws OperationCanceledException{
+    public void updateElement(int index) throws OperationCanceledException{
         //checking if element exists
         if (database.get(index) == null){
             System.out.println("Invalid index!");
@@ -345,320 +248,7 @@ public class DataBase {
         System.out.println("Worker was successfully updated!");
     }
 
-    //terminal commands
-
-    /**
-     * small version of update_by_id command - excluding the updating process
-     * @param commandWithID
-     * @throws OperationCanceledException
-     */
-    protected void updateById(String commandWithID) throws OperationCanceledException {
-        //removing spaces and "update" word to turn into long
-        commandWithID = Terminal.removeString(commandWithID, "update");
-        if (commandWithID.isEmpty() || !commandWithID.matches("\\d+")){
-            System.out.println("Invalid id");
-            return;
-        }
-        long id = Long.parseLong(commandWithID);
-
-        //trying to find element
-        if (returnIndexById(id) != -1){
-            updateFields(returnIndexById(id));
-            } else {
-            System.out.println("Element not found");
-        }
-    }
-
-    protected void help(){
-        System.out.println("------------------------------------");
-        System.out.println("Commands: ");
-        for (int i = 0; i < Commands.values().length; i++) {
-            System.out.println(" " + Commands.getCommandsWithDescriptions()[i]);
-        }
-        System.out.println("------------------------------------");
-    }
-
-    protected void add() {
-        //creating
-        Worker newWorker = null;
-        try {
-            newWorker = new Worker.WorkerBuilderFromTerminal().build();
-        } catch (OperationCanceledException | InvalidDataException e) {
-            System.out.println(e.getMessage());
-            System.out.println("Couldn't add worker");
-            return;
-        }
-
-        //adding to database
-        this.database.add(newWorker);
-        System.out.println("New worker was successfully added!");
-    }
-
-    protected void show(){
-        //checking if database is empty
-        if (database.isEmpty()){
-            System.out.println("Database is empty");
-            return;
-        }
-        System.out.println("------------------------------------");
-        List<List<String>> rows = new ArrayList<>();
-        List<String> headers = Arrays.asList("Name", "id", "Salary", "Position", "Personality", "Coordinates", "Start Date", "End Date");
-        rows.add(headers);
-        StringBuilder coord = new StringBuilder();
-        ArrayList<String> sb = new ArrayList<>();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        for (Worker worker : database) {
-            sb.add(worker.getName());sb.add(String.valueOf(worker.getId()));sb.add(String.valueOf(worker.getSalary()));
-
-            //adding position
-            if (worker.getPosition() != null){
-                sb.add(worker.getPosition().toString());
-            } else {
-                sb.add("null");
-            }
-
-            //adding personality
-            if (worker.getPerson() != null) {
-                sb.add(worker.getPerson().getHeight() + ", " + worker.getPerson().getWeight());
-            } else {
-                sb.add("null");
-            }
-
-            coord.append(worker.getCoordinates().getX()).append(", ").append(worker.getCoordinates().getY());
-            sb.add(coord.toString());
-            coord.delete(0, coord.length());
-
-            sb.add(worker.getStartDate().format(formatter));
-            if (worker.getEndDate() != null){
-                sb.add(worker.getEndDate().format(formatter));
-            } else {
-                sb.add("null");
-            }
-
-            rows.add((List<String>) sb.clone());
-            sb.clear();
-        }
-        System.out.println(Terminal.formatAsTable(rows));
-        System.out.println("------------------------------------");
-    }
-
-    protected void info(){
-        System.out.println("------------------------------------");
-        System.out.println("Type: Linked List");
-        System.out.println("Initialization date: " + initializationTime.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT, FormatStyle.MEDIUM)));
-        System.out.println("Number of Workers: " + this.database.size());
-        System.out.println("------------------------------------");
-    }
-
-    protected void clear(){
-        //asking if user really wants to clear the database
-        try {
-            if ( Terminal.binaryChoice("clear the database") ){
-                database.clear();
-                System.out.println("The database was successfully cleared");
-            } else {
-                System.out.println("Operation cancelled");
-            }
-        } catch (OperationCanceledException e) {
-            //catch EOF
-            System.out.println(e.getMessage());
-        }
-    }
-
-    protected void save(){
-        //input file name
-        System.out.print("Please, type the name of a new file: ");
-        String newFilename;
-        try {
-            newFilename = Terminal.removeSpaces(Terminal.repeatInputAndExpectRegex("filename", "\\s*\\w+\\s*")) + ".xml";
-        } catch (OperationCanceledException e) {
-            System.out.println(e.getMessage());
-            return;
-        }
-
-        //checking if user wants to overwrite existing file
-        //if not - throw exception == canceling
-        try {
-            FileParser.overWriteFile(newFilename);
-        } catch (OperationCanceledException e) {
-            System.out.println(e.getMessage());
-            return;
-        }
-
-        FileParser.dataBasetoXML(FileParser.dataBaseToString(this.database), newFilename);
-    }
-
-    protected void remove(String commandWithID){
-        //removing spaces and "remove" word to turn into long
-        commandWithID = Terminal.removeString(commandWithID, "remove_by_id");
-        long id = Long.parseLong(commandWithID);
-
-        //trying to find element
-        if (returnIndexById(id) != -1){
-            try {
-                if (Terminal.binaryChoice("delete worker")){
-                    this.database.remove(returnIndexById(id));
-                    System.out.println("Worker was successfully deleted from the database");
-                } else {
-                    System.out.println("Operation canceled");
-                }
-            } catch (OperationCanceledException e) {
-                //catching EOF
-                System.out.println(e.getMessage());
-            }
-        } else {
-            System.out.println("Element not found");
-        }
-    }
-
-    protected void executeScript(String commandWithFilename){
-        //removing spaces and "remove" word to turn into long
-        commandWithFilename = Terminal.removeString(commandWithFilename, "execute_script") + ".txt";
-
-        //catching recursion
-        if (this.scriptName.equals(commandWithFilename)){
-            this.recursionCounter++;
-        } else {
-            this.scriptName = commandWithFilename;
-            this.recursionCounter = 0;
-        }
-
-        //stopping if recursion detected
-        if (this.recursionCounter > 10){
-            System.out.println("Executing stopped to avoid stack overflow");
-            this.scriptName = commandWithFilename;
-            this.recursionCounter = 0;
-            this.terminal = new Scanner(System.in);
-            Terminal.changeScanner(this.terminal);
-            readFromTerminal();
-            return;
-        }
-
-        //new file and check if it exist
-        File f = new File(commandWithFilename);
-        if ( FileParser.alreadyExistCheck(commandWithFilename)){
-            try {
-                //changing terminal scanner on file's
-                //IMPORTANT: THE LINK TO DATABASE'S SCANNER IS GIVEN, NOT NEW
-                this.terminal = new Scanner(f);
-                Terminal.changeScanner(this.terminal);
-                while (this.terminal.hasNext()) {
-                    readFromTerminal();
-                }
-            } catch (FileNotFoundException e) {
-                System.out.println(e.getMessage());
-            }
-        }
-        //chaging terminal back
-        this.terminal = new Scanner(System.in);
-        Terminal.changeScanner(this.terminal);
-        //continue reading
-        readFromTerminal();
-    }
-
-    protected void removeGreater(String commandWithSalary){
-        //removing spaces and "update" word to turn into long
-        commandWithSalary = Terminal.removeString(commandWithSalary, "remove_greater");
-        double salary = Double.parseDouble(commandWithSalary);
-
-        for (int i = 0; i < this.database.size(); i++) {
-            if (this.database.get(i).getSalary() > salary){
-                this.database.remove(i);
-            }
-        }
-
-        System.out.println("Workers with salary greater " + salary + " were successfully removed!");
-    }
-
-    protected void removeLower(String commandWithSalary){
-        //removing spaces and "update" word to turn into long
-        commandWithSalary = Terminal.removeString(commandWithSalary, "remove_lower");
-        double salary = Double.parseDouble(commandWithSalary);
-
-        for (int i = 0; i < this.database.size(); i++) {
-            if (this.database.get(i).getSalary() < salary){
-                this.database.remove(i);
-            }
-        }
-
-        System.out.println("Workers with salary lower " + salary + " were successfully removed!");
-    }
-
-    protected void groupCountingByPosition(){
-        StringBuilder sb = new StringBuilder();
-        for (Position p: Position.values()) {
-            System.out.println("-----------" + p.toString() + "-----------");
-            for (Worker worker : this.database) {
-                if (worker.getPosition() != null) {
-                    if (worker.getPosition().equals(p)){
-                        sb.append(worker.getName()).append(" ").append(worker.getId());
-                    }
-                }
-                System.out.println(sb.toString());
-                sb.delete(0, sb.length());
-            }
-        }
-    }
-
-    protected void countLessThanStartDate(String commandWithStartDate){
-        //removing spaces and "count_less_than_start_date" word to turn into date
-        commandWithStartDate = Terminal.removeString(commandWithStartDate, "count_less_than_start_date");
-        if (!commandWithStartDate.matches("\\s*(?!0000)(\\d{4})-(0[1-9]|1[0-2])-[0-3]\\d\\s*")){
-            System.out.println("Invalid date!");
-            return;
-        }
-
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        LocalDate date = LocalDate.parse(commandWithStartDate, formatter);
-        ZonedDateTime z = date.atStartOfDay(ZoneId.systemDefault());
-
-        int counter = 0;
-        for (Worker w:this.database) {
-            if (w.getStartDate().isBefore(z)){
-                counter++;
-            }
-        }
-        System.out.println("There are " + counter + " workers with StartDate less than " + commandWithStartDate);
-    }
-
-    protected void filterGreaterThanStartDate(String commandWithStartDate){
-        //removing spaces and "count_less_than_start_date" word to turn into date
-        commandWithStartDate = Terminal.removeString(commandWithStartDate, "filter_greater_than_start_date");
-        if (!commandWithStartDate.matches("\\s*(?!0000)(\\d{4})-(0[1-9]|1[0-2])-[0-3]\\d\\s*")){
-            System.out.println("Invalid date!");
-            return;
-        }
-
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        LocalDate date = LocalDate.parse(commandWithStartDate, formatter);
-        ZonedDateTime z = date.atStartOfDay(ZoneId.systemDefault());
-
-        System.out.println("-----Workers with date after " + commandWithStartDate + " -----");
-        for (Worker w:this.database) {
-            if (w.getStartDate().isAfter(z)){
-                System.out.println(w.getName() + " " + w.getId());
-            }
-        }
-        System.out.println("-------------------------");
-    }
-
-    protected void addIfMax(){
-        Worker newWorker = null;
-        try {
-            newWorker = new Worker.WorkerBuilderFromTerminal().build();
-        } catch (OperationCanceledException | InvalidDataException e) {
-            System.out.println(e.getMessage());
-            System.out.println("Couldn't add worker");
-            return;
-        }
-
-        for (Worker w: this.database) {
-            if (w.getSalary() > newWorker.getSalary()){
-                System.out.println("New worker hasn't got the max salary!");
-                return;
-            }
-        }
-
-        this.database.add(newWorker);
+    public ZonedDateTime getInitializationTime(){
+        return this.initializationTime;
     }
 }

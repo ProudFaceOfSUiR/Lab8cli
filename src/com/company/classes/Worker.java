@@ -5,6 +5,7 @@ import com.company.enums.Position;
 import com.company.exceptions.InvalidDataException;
 import com.company.exceptions.OperationCanceledException;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -12,7 +13,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Random;
 
-public class Worker {
+public class Worker implements Serializable {
     private Long id; //Поле не может быть null, Значение поля должно быть больше 0, Значение этого поля должно быть уникальным, Значение этого поля должно генерироваться автоматически
     private String name; //Поле не может быть null, Строка не может быть пустой
     private Coordinates coordinates; //Поле не может быть null
@@ -75,7 +76,7 @@ public class Worker {
         //protected methods for terminal input
 
         protected void setName() throws InvalidDataException, OperationCanceledException{
-            System.out.print("Please, write the name of a new worker: (String, not Null)");
+            System.out.print("Please, write the name of a new worker (String, not Null): ");
             worker.setName(
                     Terminal.removeSpaces(
                             Terminal.repeatInputAndExpectRegex("name", "\\s*\\w+\\s*")
@@ -84,7 +85,7 @@ public class Worker {
         }
 
         protected void setSalary() throws InvalidDataException, OperationCanceledException{
-            System.out.print("PLease, input " + worker.getName() + "'s salary: (double, not null, >0)");
+            System.out.print("PLease, input " + worker.getName() + "'s salary (double, not null, >0): ");
             worker.setSalary(
                     Double.parseDouble(
                             Terminal.removeSpaces(
@@ -100,14 +101,14 @@ public class Worker {
 
         protected void setPersonality(){
             Person person = new Person();
-            System.out.println("PLease, write " + worker.getName() + "'s height: (Long, >0)");
+            System.out.println("PLease, write " + worker.getName() + "'s height (Long, >0): ");
             try {
                 person.setHeight(Long.valueOf(Terminal.repeatInputAndExpectRegexOrNull("height", "\\s*[0-9]+\\s*")));
             } catch (Exception e){
                 //pass, because Person is already null
             }
 
-            System.out.println("PLease, write " + worker.getName() + "'s weight: (Integer, >0)");
+            System.out.println("PLease, write " + worker.getName() + "'s weight (Integer, >0): ");
             try {
                 person.setWeight((int) Long.parseLong(Terminal.repeatInputAndExpectRegexOrNull("weight", "\\s*[0-9]+\\s*")));
             } catch (Exception e){
@@ -117,7 +118,7 @@ public class Worker {
         }
 
         protected void setCoordinates() throws OperationCanceledException{
-            System.out.println("PLease, input " + worker.getName() + "'s coordinates (not null)");
+            System.out.println("PLease, input " + worker.getName() + "'s coordinates (not null): ");
             Coordinates c = new Coordinates(0,0);
 
             try {
@@ -142,7 +143,7 @@ public class Worker {
         }
 
         protected void setDates() throws OperationCanceledException{
-            System.out.println("Please, write the start day (yyyy-mm-dd): (not null)");
+            System.out.println("Please, write the start day (yyyy-mm-dd) (not null): ");
 
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
             LocalDate date = LocalDate.parse(Terminal.removeSpaces(Terminal.repeatInputAndExpectRegex(
