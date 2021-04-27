@@ -5,6 +5,7 @@ package com.company.main;
 import com.company.database.DataBase;
 import com.company.exceptions.NotConnectedException;
 import com.company.network.Client;
+import com.sun.javaws.IconUtil;
 
 public class Main {
 
@@ -19,31 +20,18 @@ public class Main {
         }
 
         //initializing clent
-        Client client = new Client();
-        boolean isInitialized = false;
-        while (!isInitialized){
-            isInitialized = client.initialize(dataBase);
-            if (!isInitialized) {
-                try {
-                    System.out.println("Reinitializing...");
-                    Thread.sleep(5000);
-                } catch (InterruptedException interruptedException) {
-                    System.out.println(interruptedException.getMessage());
-                }
-            }
-        }
+        Client client = new Client(dataBase);
 
         //connecting and reading commands
-        boolean isConnected = client.connectToServer(initializedFromFile);
+        client.connectToServer(initializedFromFile);
         while (true){
-            if (!isConnected){
+            if (!client.isConnected()){
+                System.out.println("Reconnecting...");
                 try {
                     Thread.sleep(5000);
                 } catch (InterruptedException interruptedException) {
                     System.out.println(interruptedException.getMessage());
                 }
-                System.out.println("Reconnecting...");
-                isConnected = client.connectToServer(initializedFromFile);
                 continue;
             }
 
@@ -52,7 +40,6 @@ public class Main {
                     client.readCommand();
                 } catch (NotConnectedException e) {
                     System.out.println(e.getMessage());
-                    isConnected = false;
                     break;
                 }
             }

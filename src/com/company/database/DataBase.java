@@ -110,12 +110,7 @@ public class DataBase implements Serializable {
      * @param index
      * @throws OperationCanceledException
      */
-    public void updateElement(int index) throws OperationCanceledException{
-        //checking if element exists
-        if (database.get(index) == null){
-            System.out.println("Invalid index!");
-            return;
-        }
+    public Worker updateElement(Worker workerToUpdate) throws OperationCanceledException{
 
         //choosing the field to update
         System.out.println("Which field would you like to update: " + Arrays.toString(Arrays.stream(Fields.getFields()).toArray()) + " ?");
@@ -135,20 +130,20 @@ public class DataBase implements Serializable {
             case NAME:
                 System.out.println("Please, type the new name: ");
                 try {
-                    database.get(index).setName(Terminal.removeSpaces(Terminal.repeatInputAndExpectRegex("name", "\\s*\\w+\\s*")) );
+                    workerToUpdate.setName(Terminal.removeSpaces(Terminal.repeatInputAndExpectRegex("name", "\\s*\\w+\\s*")) );
                 } catch (InvalidDataException | OperationCanceledException e) {
                     System.out.println(e.getMessage());
-                    return;
+                    return null;
                 }
                 System.out.println(field.toString() + " has been successfully updated!");
                 break;
             case SALARY:
                 System.out.println("Please, type the new salary: ");
                 try {
-                    database.get(index).setSalary(Double.parseDouble(Terminal.removeSpaces(Terminal.repeatInputAndExpectRegex("salary", "\\s*\\d+\\.*\\d*\\s*"))));
+                    workerToUpdate.setSalary(Double.parseDouble(Terminal.removeSpaces(Terminal.repeatInputAndExpectRegex("salary", "\\s*\\d+\\.*\\d*\\s*"))));
                 } catch (InvalidDataException | OperationCanceledException e) {
                     System.out.println(e.getMessage());
-                    return;
+                    return null;
                 }
                 System.out.println(field.toString() + " has been successfully updated!");
                 break;
@@ -159,9 +154,9 @@ public class DataBase implements Serializable {
                     newPosition = Position.findEnum(Terminal.removeSpaces(Terminal.repeatInputAndExpectRegexOrNull("position", "\\s*\\w+\\s*")));
                 } catch (OperationCanceledException e) {
                     System.out.println(e.getMessage());
-                    return;
+                    return null;
                 }
-                this.database.get(index).setPosition(newPosition);
+                workerToUpdate.setPosition(newPosition);
                 System.out.println(field.toString() + " has been successfully updated!");
                 break;
             case PERSONALITY:
@@ -180,7 +175,7 @@ public class DataBase implements Serializable {
                     //pass
                 }
 
-                this.database.get(index).setPerson(person);
+                workerToUpdate.setPerson(person);
                 System.out.println(field.toString() + " has been successfully updated!");
                 break;
             case COORDINATES:
@@ -201,10 +196,10 @@ public class DataBase implements Serializable {
                     );
                 } catch (InvalidDataException | OperationCanceledException e) {
                     System.out.println(e.getMessage());
-                    return;
+                    return null;
                 }
 
-                this.database.get(index).setCoordinates(c);
+                workerToUpdate.setCoordinates(c);
                 System.out.println(field.toString() + " has been successfully updated!");
                 break;
             case STARTDATE:
@@ -217,10 +212,10 @@ public class DataBase implements Serializable {
                             "start day", "\\s*(?!0000)(\\d{4})-(0[1-9]|1[0-2])-[0-3]\\d\\s*")), formatter);
                 } catch (OperationCanceledException e) {
                     System.out.println(e.getMessage());
-                    return;
+                    return null;
                 }
 
-                this.database.get(index).setStartDate( date.atStartOfDay(ZoneId.systemDefault()) );
+                workerToUpdate.setStartDate( date.atStartOfDay(ZoneId.systemDefault()) );
                 System.out.println(field.toString() + " has been successfully updated!");
                 break;
             case ENDDATE:
@@ -233,19 +228,19 @@ public class DataBase implements Serializable {
                     );
                 } catch (OperationCanceledException e) {
                     System.out.println(e.getMessage());
-                    return;
+                    return null;
                 }
                 if (enddate == null){
-                    this.database.get(index).setEndDate(null);
+                    workerToUpdate.setEndDate(null);
                 } else {
                     date = LocalDate.parse(enddate, formatter);
-                    this.database.get(index).setEndDate(date.atStartOfDay(ZoneId.systemDefault()));
+                    workerToUpdate.setEndDate(date.atStartOfDay(ZoneId.systemDefault()));
                 }
 
                 System.out.println(field.toString() + " has been successfully updated!");
                 break;
         }
-        System.out.println("Worker was successfully updated!");
+        return workerToUpdate;
     }
 
     public ZonedDateTime getInitializationTime(){

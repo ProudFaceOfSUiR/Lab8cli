@@ -9,6 +9,7 @@ import com.company.exceptions.NotConnectedException;
 import com.company.exceptions.OperationCanceledException;
 import com.company.exceptions.UnknownCommandException;
 
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
@@ -25,14 +26,19 @@ public class Client {
     String command;
     String input;
 
-    public boolean initialize(DataBase dataBase){
-
+    public Client (DataBase dataBase){
         this.terminal = new Scanner(System.in);
         this.dataBase = dataBase;
         command = null;
         input = null;
         output = new Messages();
+    }
 
+    public boolean isConnected(){
+        return this.client.isConnected();
+    }
+
+    public boolean connectToServer(boolean initializedFromFile){
         try {
             this.client = new Socket("localhost", 1488);
         } catch (Exception e) {
@@ -40,10 +46,6 @@ public class Client {
             return false;
         }
 
-        return true;
-    }
-
-    public boolean connectToServer(boolean initializedFromFile){
         try {
             this.out = new ObjectOutputStream(client.getOutputStream());
             this.in = new ObjectInputStream(client.getInputStream());
@@ -104,7 +106,7 @@ public class Client {
         this.command = command.toLowerCase();
 
         //skip empty line
-        if (command.matches("\\s") || command.matches("\n")) return;
+        if (command.trim().isEmpty()) return;
 
         try {
             //getting command
@@ -131,9 +133,8 @@ public class Client {
                     this.output.addObject(wb.build());
                     break;
                 case UPDATE:
-                    //todo
-                    //updateById(command);
-                    break;
+                    updateByIdCommand(c, command);
+                    return;
                 case REMOVE_BY_ID:
                     if (!command.matches("\\s*\\w+\\s+\\d+\\s*")){
                         System.out.println("Invalid id format. Operation cancelled");
@@ -208,5 +209,50 @@ public class Client {
             throw new NotConnectedException();
         }
         System.out.println("------------------------------------");
+    }
+
+    protected void updateByIdCommand(Commands command, String commandWithID){
+
+        commandWithID = Terminal.removeString(commandWithID, "update");
+
+        //abort if id is empty
+        if (commandWithID.isEmpty() || !commandWithID.matches("\\d+")) {
+            System.out.println("Invalid id format. Operation cancelled");
+            return;
+        }
+
+        long id = Long.parseLong(commandWithID);
+
+        this.output.addObject(command);
+        this.output.addObject(id);
+
+        //sending command and id
+        try {
+            Objects.requireNonNull(out).writeObject(this.output);
+            this.out.flush();
+            out.reset();
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+            return;
+        }
+
+        this.output.clear();
+
+        //updating worker
+        try {
+            this.output.addObject(
+                    this.dataBase.updateElement(
+                            (Worker)((Messages) this.in.readObject()).getObject(0)
+                    )
+            );
+        } catch (IOException | ClassNotFoundException | OperationCanceledException e) {
+            System.out.println(e.getMessage());
+            return;
+        }
+
+        //sending worker
+        try {
+            System.out.println(sendMessage());
+        } catch (Exception ignored) {}
     }
 }
