@@ -63,7 +63,7 @@ public class Terminal {
      * @throws OperationCanceledException
      */
     public static boolean binaryChoice(String move) throws OperationCanceledException{
-        System.out.println("Do you want to " + move + "? (Yes/No)");
+        System.out.println("Are you sure you want to " + move + "? (Yes/No)");
 
         String command;
         try {

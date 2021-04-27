@@ -96,7 +96,15 @@ public class Worker implements Serializable {
 
         protected void setPosition() throws OperationCanceledException{
             System.out.println("Please, write " + worker.getName() + "'s position " + Arrays.toString(Arrays.stream(Position.getPositions()).toArray()) + ": ");
-            worker.setPosition(Position.findEnum(Terminal.repeatInputAndExpectRegexOrNull("position","\\s*\\w+\\s*")));
+
+            String s = Terminal.repeatInputAndExpectRegexOrNull("position","\\s*\\w+\\s*");
+
+            while (s != null && Position.findEnum(s) == null){
+                System.out.println("Incorrect position. Please, try again: ");
+                s = Terminal.repeatInputAndExpectRegexOrNull("position","\\s*\\w+\\s*");
+            }
+
+            worker.setPosition(Position.findEnum(s));
         }
 
         protected void setPersonality(){
