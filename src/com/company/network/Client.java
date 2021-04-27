@@ -2,6 +2,7 @@ package com.company.network;
 
 import com.company.classes.Worker;
 import com.company.database.DataBase;
+import com.company.database.FileParser;
 import com.company.database.Terminal;
 import com.company.enums.Commands;
 import com.company.exceptions.InvalidDataException;
@@ -9,9 +10,7 @@ import com.company.exceptions.NotConnectedException;
 import com.company.exceptions.OperationCanceledException;
 import com.company.exceptions.UnknownCommandException;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.net.Socket;
 import java.util.Objects;
 import java.util.Scanner;
@@ -25,6 +24,8 @@ public class Client {
     DataBase dataBase;
     String command;
     String input;
+    private String scriptName;
+    private int recursionCounter;
 
     public Client (DataBase dataBase){
         this.terminal = new Scanner(System.in);
@@ -32,6 +33,8 @@ public class Client {
         command = null;
         input = null;
         output = new Messages();
+        this.recursionCounter = 0;
+        this.scriptName = "";
     }
 
     public boolean connectToServer(){
@@ -142,9 +145,8 @@ public class Client {
                     }
                     break;
                 case EXECUTE_SCRIPT:
-                    //todo
-                    //executeScript(command);
-                    break;
+                    executeScriptCommand(command);
+                    return;
                 case EXIT:
                     this.output.addObject(c);
                     try {
@@ -267,5 +269,55 @@ public class Client {
         try {
             System.out.println(sendMessage());
         } catch (Exception ignored) {}
+    }
+
+    public void executeScriptCommand(String commandWithFilename){
+        //removing spaces and "remove" word to turn into long
+        commandWithFilename = Terminal.removeString(commandWithFilename, "execute_script") + ".txt";
+
+        //catching recursion
+        if (this.scriptName.equals(commandWithFilename)){
+            this.recursionCounter++;
+        } else {
+            this.scriptName = commandWithFilename;
+            this.recursionCounter = 0;
+        }
+
+        //stopping if recursion detected
+        if (this.recursionCounter > 10){
+            System.out.println("Executing stopped to avoid stack overflow");
+            this.scriptName = commandWithFilename;
+            this.recursionCounter = 0;
+            this.terminal = new Scanner(System.in);
+            Terminal.changeScanner(this.terminal);
+            return;
+        }
+
+        //new file and check if it exist
+        File f = new File(commandWithFilename);
+        if ( FileParser.alreadyExistCheck(commandWithFilename)){
+            try {
+                //changing terminal scanner on file's
+                //IMPORTANT: THE LINK TO DATABASE'S SCANNER IS GIVEN, NOT NEW
+                this.terminal = new Scanner(f);
+                Terminal.changeScanner(this.terminal);
+                while (this.terminal.hasNext()) {
+                    try {
+                        readCommand();
+                    } catch (NotConnectedException e) {
+                        System.out.println(e.getMessage());
+                        return;
+                    }
+                }
+            } catch (FileNotFoundException e) {
+                System.out.println(e.getMessage());
+            }
+        } else {
+            System.out.println("File not found. Operation cancelled");
+            return;
+        }
+        //chaging terminal back
+        this.terminal = new Scanner(System.in);
+        Terminal.changeScanner(this.terminal);
     }
 }

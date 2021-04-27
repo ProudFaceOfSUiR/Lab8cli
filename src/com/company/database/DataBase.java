@@ -27,8 +27,6 @@ public class DataBase implements Serializable {
 
     private LinkedList<Worker> database;
     private Scanner terminal;
-    private String scriptName;
-    private int recursionCounter;
 
     //check booleans
     private boolean isInitialized;
@@ -48,8 +46,6 @@ public class DataBase implements Serializable {
         this.database = new LinkedList<>();
         this.terminal = new Scanner(System.in);
         this.initializationTime = ZonedDateTime.now();
-        this.recursionCounter = 0;
-        this.scriptName = "";
         this.isInitialized = true;
 
         System.out.println("Client's database has been initialized");
@@ -67,8 +63,6 @@ public class DataBase implements Serializable {
         this.database = new LinkedList<>();
         this.terminal = new Scanner(System.in);
         this.initializationTime = ZonedDateTime.now();
-        this.recursionCounter = 0;
-        this.scriptName = "";
         this.isInitialized = true;
 
         System.out.println("Client's database has been initialized without file");
@@ -103,7 +97,6 @@ public class DataBase implements Serializable {
     public LinkedList<Worker> getDatabase(){
         return this.database;
     }
-
 
     public Worker updateElement(Worker workerToUpdate) throws OperationCanceledException{
 
@@ -236,9 +229,5 @@ public class DataBase implements Serializable {
                 break;
         }
         return workerToUpdate;
-    }
-
-    public ZonedDateTime getInitializationTime(){
-        return this.initializationTime;
     }
 }

@@ -76,7 +76,7 @@ public class Worker implements Serializable {
         //protected methods for terminal input
 
         protected void setName() throws InvalidDataException, OperationCanceledException{
-            System.out.print("Please, write the name of a new worker (String, not Null): ");
+            System.out.println("Please, write the name of a new worker (String, not Null): ");
             worker.setName(
                     Terminal.removeSpaces(
                             Terminal.repeatInputAndExpectRegex("name", "\\s*\\w+\\s*")
@@ -85,7 +85,7 @@ public class Worker implements Serializable {
         }
 
         protected void setSalary() throws InvalidDataException, OperationCanceledException{
-            System.out.print("PLease, input " + worker.getName() + "'s salary (double, not null, >0): ");
+            System.out.println("PLease, input " + worker.getName() + "'s salary (double, not null, >0): ");
             worker.setSalary(
                     Double.parseDouble(
                             Terminal.removeSpaces(
