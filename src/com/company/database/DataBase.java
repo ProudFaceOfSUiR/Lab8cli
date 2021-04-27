@@ -86,8 +86,6 @@ public class DataBase implements Serializable {
 
             if (!databaseFromXML.isEmpty()){
                 this.database = databaseFromXML;
-            } else {
-                System.out.println("Database wasn't filled.");
             }
         } catch (Exception e) {
             System.out.println(e.getMessage());

@@ -36,7 +36,7 @@ public class Main {
             isConnected = client.connectToServer();
         }
         try {
-            if (initializedFromFile && Terminal.binaryChoice("merge client's database with server's")) {
+            if (!dataBase.getDatabase().isEmpty() && initializedFromFile && Terminal.binaryChoice("merge client's database with server's")) {
                 client.fillFromFile();
             }
         } catch (OperationCanceledException e) {
