@@ -34,11 +34,7 @@ public class Client {
         output = new Messages();
     }
 
-    public boolean isConnected(){
-        return this.client.isConnected();
-    }
-
-    public boolean connectToServer(boolean initializedFromFile){
+    public boolean connectToServer(){
         try {
             this.client = new Socket("localhost", 1488);
         } catch (Exception e) {
@@ -57,10 +53,6 @@ public class Client {
         System.out.println("Connected successfully");
         System.out.println("------------------------------------");
 
-        if (initializedFromFile){
-            fillFromFile();
-        }
-
         return true;
     }
 
@@ -74,7 +66,7 @@ public class Client {
             throw e;
         }
         try {
-            feedback = (String) in.readObject();
+            feedback = (String) ((Messages) in.readObject()).getObject(0);
         } catch (Exception e) {
             System.out.println("Error while getting feedback: " + e.getMessage());
             throw e;
@@ -84,7 +76,7 @@ public class Client {
         return feedback;
     }
 
-    protected void fillFromFile(){
+    public void fillFromFile(){
         try {
             this.output.addObject(Commands.FILL_FROM_FILE);
             this.output.addObject(this.dataBase.getDatabase());
@@ -154,7 +146,13 @@ public class Client {
                     //executeScript(command);
                     break;
                 case EXIT:
-                    //todo
+                    this.output.addObject(c);
+                    try {
+                        sendMessage();
+                    } catch (Exception e) {
+                        System.out.println(e.getMessage());
+                    }
+                    System.exit(1);
                     break;
                 case REMOVE_GREATER:
                 case REMOVE_LOWER:
@@ -238,14 +236,29 @@ public class Client {
 
         this.output.clear();
 
+        Messages response;
+        try {
+            response = (Messages) this.in.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            System.out.println(e.getMessage());
+            return;
+        }
+
+        //aborting if response is string (== error)
+        if (response.getObject(0).getClass().equals(String.class)){
+            System.out.println(response.getObject(0));
+            return;
+        }
+
         //updating worker
         try {
             this.output.addObject(
                     this.dataBase.updateElement(
-                            (Worker)((Messages) this.in.readObject()).getObject(0)
+                            (Worker)(response.getObject(0)
+                        )
                     )
             );
-        } catch (IOException | ClassNotFoundException | OperationCanceledException e) {
+        } catch (OperationCanceledException e) {
             System.out.println(e.getMessage());
             return;
         }

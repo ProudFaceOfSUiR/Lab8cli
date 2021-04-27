@@ -165,11 +165,11 @@ public class FileParser {
                         if (eElement.getElementsByTagName("salary").item(0).getTextContent().matches("\\s*[0-9]+.*[0-9]*\\s*")) {
                             salary = Double.parseDouble(Terminal.removeSpaces(eElement.getElementsByTagName("salary").item(0).getTextContent()));
                         } else {
-                            System.out.println(name + "'s salary is invalid. Couldn't add worker");
+                            System.out.println("(" + name + ") " + "Salary is invalid. Couldn't add worker");
                             continue;
                         }
                     } catch (Exception e){
-                        System.out.println("Something went wrong with the " + name +  "'s salary: " + e.getMessage());
+                        System.out.println("Something went wrong with " + name +  "'s salary: " + e.getMessage());
                         continue;
                     }
 
@@ -178,7 +178,7 @@ public class FileParser {
                         positionString = eElement.getElementsByTagName("position").item(0).getTextContent();
                         position = Position.findEnum(positionString);
                     } catch (Exception e){
-                        System.out.println("Something went wrong with the " + name + "'s position: " + e.getMessage());
+                        System.out.println("Something went wrong with " + name + "'s position: " + e.getMessage());
                         continue;
                     }
 
@@ -195,7 +195,7 @@ public class FileParser {
                         person = null;
                     }
                     catch (Exception e){
-                        System.out.println("Something went wrong with the " + name + "'s personality: " + e.getMessage());
+                        System.out.println("Something went wrong with " + name + "'s personality: " + e.getMessage());
                         continue;
                     }
 
@@ -203,14 +203,14 @@ public class FileParser {
                         //adding coordinates
                         if (eElement.getElementsByTagName("coordinates").item(0).getTextContent().isEmpty() ||
                                 !eElement.getElementsByTagName("coordinates").item(0).getTextContent().matches("\\s*\\d+,\\d+\\s*")) {
-                            System.out.println("Invalid coordinates. Couldn't add worker");
+                            System.out.println("(" + name + ") " + "Invalid coordinates. Couldn't add worker");
                             continue;
                         } else {
                             String[] xy = eElement.getElementsByTagName("coordinates").item(0).getTextContent().split(",");
                             coordinates = new Coordinates(Long.parseLong(Terminal.removeSpaces(xy[0])), Integer.valueOf(Terminal.removeSpaces(xy[1])));
                         }
                     } catch (Exception e){
-                        System.out.println("Something went wrong with the " + name + "'s coordinates: " + e.getMessage());
+                        System.out.println("Something went wrong with " + name + "'s coordinates: " + e.getMessage());
                         continue;
                     }
 
@@ -218,7 +218,7 @@ public class FileParser {
                         //adding start date
                         if (eElement.getElementsByTagName("startdate").item(0).getTextContent().isEmpty() ||
                                 !eElement.getElementsByTagName("startdate").item(0).getTextContent().matches("\\s*(?!0000)(\\d{4})-(0[1-9]|1[0-2])-[0-3]\\d\\s*")) {
-                            System.out.println("Invalid startDate. Couldn't add worker");
+                            System.out.println("(" + name + ") " + "Invalid startDate. Couldn't add worker");
                             continue;
                         } else {
                             LocalDate date = LocalDate.parse(
@@ -228,7 +228,7 @@ public class FileParser {
                             startdate = date.atStartOfDay(ZoneId.systemDefault());
                         }
                     } catch (Exception e){
-                        System.out.println("Something went wrong with the " + name + "'s startdate: " + e.getMessage());
+                        System.out.println("Something went wrong with " + name + "'s startdate: " + e.getMessage());
                         continue;
                     }
 
@@ -236,7 +236,7 @@ public class FileParser {
                         //adding enddate
                         if (!eElement.getElementsByTagName("enddate").item(0).getTextContent().isEmpty() &&
                                 !eElement.getElementsByTagName("enddate").item(0).getTextContent().matches("\\s*(?!0000)(\\d{4})-(0[1-9]|1[0-2])-[0-3]\\d\\s*")) {
-                            System.out.println("Invalid endDate. Couldn't add worker");
+                            System.out.println("(" + name + ") " + "Invalid endDate. Couldn't add worker");
                             continue;
                         } else if (eElement.getElementsByTagName("enddate").item(0).getTextContent().matches("\\s*(?!0000)(\\d{4})-(0[1-9]|1[0-2])-[0-3]\\d\\s*")) {
                             LocalDate date = LocalDate.parse(
@@ -249,7 +249,7 @@ public class FileParser {
                         endDate = null;
                     }
                     catch (Exception e){
-                        System.out.println("Something went wrong with the " + name + "'s enddate: " + e.getMessage());
+                        System.out.println("Something went wrong with " + name + "'s enddate: " + e.getMessage());
                         continue;
                     }
 
@@ -263,7 +263,7 @@ public class FileParser {
                 }
             }
 
-            System.out.println("DataBase has been successfully filled with " + successfullyAddedWorkers + " workers");
+            System.out.println("Client's dataBase has been successfully filled with " + successfullyAddedWorkers + " workers");
             System.out.println("------------------------------------");
             return database;
         } catch (Exception e) {

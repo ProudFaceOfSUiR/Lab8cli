@@ -3,7 +3,9 @@ package com.company.main;
 //variant 312709
 
 import com.company.database.DataBase;
+import com.company.database.Terminal;
 import com.company.exceptions.NotConnectedException;
+import com.company.exceptions.OperationCanceledException;
 import com.company.network.Client;
 import com.sun.javaws.IconUtil;
 
@@ -22,16 +24,35 @@ public class Main {
         //initializing clent
         Client client = new Client(dataBase);
 
+        //connecting and merging databases
+        boolean isConnected = client.connectToServer();
+        while (!isConnected){
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException interruptedException) {
+                System.out.println(interruptedException.getMessage());
+            }
+            System.out.println("Reconnecting...");
+            isConnected = client.connectToServer();
+        }
+        try {
+            if (initializedFromFile && Terminal.binaryChoice("merge client's database with server's")) {
+                client.fillFromFile();
+            }
+        } catch (OperationCanceledException e) {
+            System.out.println(e.getMessage());
+        }
+
         //connecting and reading commands
-        client.connectToServer(initializedFromFile);
         while (true){
-            if (!client.isConnected()){
-                System.out.println("Reconnecting...");
+            if (!isConnected){
                 try {
                     Thread.sleep(5000);
                 } catch (InterruptedException interruptedException) {
                     System.out.println(interruptedException.getMessage());
                 }
+                System.out.println("Reconnecting...");
+                isConnected = client.connectToServer();
                 continue;
             }
 
@@ -40,6 +61,7 @@ public class Main {
                     client.readCommand();
                 } catch (NotConnectedException e) {
                     System.out.println(e.getMessage());
+                    isConnected = false;
                     break;
                 }
             }

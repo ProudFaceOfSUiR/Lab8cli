@@ -52,7 +52,7 @@ public class DataBase implements Serializable {
         this.scriptName = "";
         this.isInitialized = true;
 
-        System.out.println("Database has been initialized");
+        System.out.println("Client's database has been initialized");
         System.out.println("------------------------------------");
 
         //reading from file
@@ -71,7 +71,7 @@ public class DataBase implements Serializable {
         this.scriptName = "";
         this.isInitialized = true;
 
-        System.out.println("Database has been initialized without file");
+        System.out.println("Client's database has been initialized without file");
         System.out.println("------------------------------------");
     }
 
@@ -105,11 +105,6 @@ public class DataBase implements Serializable {
     }
 
 
-    /**
-     * The whole code of updating feilds
-     * @param index
-     * @throws OperationCanceledException
-     */
     public Worker updateElement(Worker workerToUpdate) throws OperationCanceledException{
 
         //choosing the field to update
