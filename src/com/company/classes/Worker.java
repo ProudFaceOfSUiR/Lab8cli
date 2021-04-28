@@ -79,7 +79,7 @@ public class Worker implements Serializable {
             System.out.println("Please, write the name of a new worker (String, not Null): ");
             worker.setName(
                     Terminal.removeSpaces(
-                            Terminal.repeatInputAndExpectRegex("name", "\\s*\\w+\\s*")
+                            Terminal.repeatInputAndExpectRegex("name", "\\s*\\p{L}+\\s*")
                     )
             );
         }

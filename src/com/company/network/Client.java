@@ -27,6 +27,10 @@ public class Client {
     private String scriptName;
     private int recursionCounter;
 
+    public Scanner getTerminal() {
+        return terminal;
+    }
+
     public Client (DataBase dataBase){
         this.terminal = new Scanner(System.in);
         this.dataBase = dataBase;

@@ -9,6 +9,8 @@ import com.company.exceptions.OperationCanceledException;
 import com.company.network.Client;
 import com.sun.javaws.IconUtil;
 
+import java.util.NoSuchElementException;
+
 public class Main {
 
     public static void main(String[] args) {
@@ -35,12 +37,23 @@ public class Main {
             System.out.println("Reconnecting...");
             isConnected = client.connectToServer();
         }
-        try {
-            if (!dataBase.getDatabase().isEmpty() && initializedFromFile && Terminal.binaryChoice("merge client's database with server's")) {
-                client.fillFromFile();
+
+        if (!dataBase.getDatabase().isEmpty() && initializedFromFile) {
+            while (true) {
+                System.out.println("Do you want to replace server's database with client's? (Yes/No) ");
+                String command;
+                command = client.getTerminal().nextLine();
+                command = command.toUpperCase();
+                if (command.matches("\\s*YES\\s*\\w*\\s*")){
+                    client.fillFromFile();
+                    break;
+                } else if (command.matches("\\s*NO\\s*\\w*\\s*")){
+                    System.out.println("Operation ");
+                    break;
+                } else {
+                    System.out.print("Invalid command. ");
+                }
             }
-        } catch (OperationCanceledException e) {
-            System.out.println(e.getMessage());
         }
 
         //connecting and reading commands
