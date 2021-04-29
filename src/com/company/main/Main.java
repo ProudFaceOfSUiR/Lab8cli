@@ -48,7 +48,7 @@ public class Main {
                     client.fillFromFile();
                     break;
                 } else if (command.matches("\\s*NO\\s*\\w*\\s*")){
-                    System.out.println("Operation ");
+                    System.out.println("Operation cancelled");
                     break;
                 } else {
                     System.out.print("Invalid command. ");

@@ -14,6 +14,9 @@ import java.util.Arrays;
 import java.util.Random;
 
 public class Worker implements Serializable {
+
+    private static final long serialVersionUID = 66L;
+
     private Long id; //Поле не может быть null, Значение поля должно быть больше 0, Значение этого поля должно быть уникальным, Значение этого поля должно генерироваться автоматически
     private String name; //Поле не может быть null, Строка не может быть пустой
     private Coordinates coordinates; //Поле не может быть null
@@ -47,10 +50,6 @@ public class Worker implements Serializable {
     private Worker(){
         //automatically generated values
         this.creationDate = ZonedDateTime.now();
-        Random random = new Random();
-        this.id = Math.abs(Long.parseLong(String.valueOf(
-                random.nextLong() + creationDate.getSecond() + creationDate.getMinute() + creationDate.getHour())
-                .substring(0,10)));
     }
 
     /**
