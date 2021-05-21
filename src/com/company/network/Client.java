@@ -1,5 +1,6 @@
 package com.company.network;
 
+import com.company.Login.User;
 import com.company.classes.Worker;
 import com.company.database.DataBase;
 import com.company.database.FileParser;
@@ -12,6 +13,7 @@ import com.company.exceptions.UnknownCommandException;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Scanner;
 
@@ -21,11 +23,28 @@ public class Client {
     private Messages output;
     private ObjectOutputStream out;
     private ObjectInputStream in;
+    public User user;
     DataBase dataBase;
     String command;
     String input;
     private String scriptName;
     private int recursionCounter;
+
+    public void setUser(){
+        if (this.user.getNew()) {
+            this.output.addObject(Commands.SIGN_UP);
+            this.output.addObject(this.user);
+        }
+        else{
+            this.output.addObject(Commands.SIGN_IN);
+            this.output.addObject(this.user);
+        }
+    }
+
+    public void setOutputUser() {
+        this.output = new Messages();
+        this.output = output;
+    }
 
     public Scanner getTerminal() {
         return terminal;
@@ -34,6 +53,7 @@ public class Client {
     public Client (DataBase dataBase){
         this.terminal = new Scanner(System.in);
         this.dataBase = dataBase;
+        this.user = new User();
         command = null;
         input = null;
         output = new Messages();
@@ -63,7 +83,7 @@ public class Client {
         return true;
     }
 
-    protected String sendMessage() throws Exception{
+    public String sendMessage() throws Exception{
         String feedback = null;
         Objects.requireNonNull(out).writeObject(this.output);
         try {
@@ -213,6 +233,172 @@ public class Client {
             throw new NotConnectedException();
         }
         System.out.println("------------------------------------");
+    }
+
+
+
+    public void readCommand1() throws NotConnectedException {
+        Commands c;
+        //check when we read from file
+        if (!terminal.hasNext()) {
+            return;
+        }
+
+        //reading command
+        this.command = terminal.nextLine();
+        this.command = command.toLowerCase();
+
+        //skip empty line
+        if (command.trim().isEmpty()) return;
+
+        try {
+            //getting command
+            c = Terminal.matchCommand(command);
+
+            switch (c) {
+                case HELP:
+                case INFO:
+                case SHOW:
+                case GROUP_COUNTING_BY_POSITION:
+                    this.output.addObject(c);
+                    this.output.addObject(null);
+                    this.output.addObject(user);
+                    break;
+                case CLEAR:
+                    if (Terminal.binaryChoice("clear the database")){
+                        this.output.addObject(c);
+                        this.output.addObject(user);
+                    } else {
+                        System.out.println("Operation cancelled");
+                    }
+                    break;
+                case ADD:
+                case ADD_IF_MAX:
+                    this.output.addObject(c);
+                    Worker.WorkerBuilderFromTerminal wb = new Worker.WorkerBuilderFromTerminal();
+                    this.output.addObject(wb.build());
+                    this.output.addObject(user);
+                    break;
+                case UPDATE:
+                    updateByIdCommand(c, command);
+                    return;
+                case REMOVE_BY_ID:
+                    if (!command.matches("\\s*\\w+\\s+\\d+\\s*")){
+                        System.out.println("Invalid id format. Operation cancelled");
+                        return;
+                    }
+
+                    if (Terminal.binaryChoice("delete worker from database")) {
+                        this.output.addObject(c);
+                        this.output.addObject(command);
+                        this.output.addObject(user);;
+                    } else {
+                        System.out.println("Operation cancelled");
+                        return;
+                    }
+                    break;
+                case EXECUTE_SCRIPT:
+                    executeScriptCommand(command);
+                    //this.output.addObject(user);
+                    return;
+                case EXIT:
+                    this.output.addObject(c);
+                    try {
+                        sendMessage();
+                    } catch (Exception e) {
+                        System.out.println(e.getMessage());
+                    }
+                    System.exit(1);
+                    break;
+                case REMOVE_GREATER:
+                case REMOVE_LOWER:
+                    if (!command.matches("\\s*\\w+\\s+\\d+\\s*")){
+                        System.out.println("Invalid salary format. Operation cancelled");
+                        return;
+                    }
+
+                    if (Terminal.binaryChoice("remove these workers")) {
+                        this.output.addObject(c);
+                        this.output.addObject(command);
+                        this.output.addObject(user);
+                    } else {
+                        System.out.println("Operation cancelled");
+                        return;
+                    }
+                    break;
+                case COUNT_LESS_THAN_START_DATE:
+                    command = Terminal.removeString(command, "count_less_than_start_date");
+                    if (!command.matches("\\s*(?!0000)(\\d{4})-(0[1-9]|1[0-2])-[0-3]\\d\\s*")){
+                        System.out.println("Invalid date format. Operation cancelled");
+                        return;
+                    }
+
+                    this.output.addObject(c);
+                    this.output.addObject(command);
+                    this.output.addObject(user);
+
+                    break;
+                case FILTER_GREATER_THAN_START_DATE:
+                    command = Terminal.removeString(command, "filter_greater_than_start_date");
+                    if (!command.matches("\\s*(?!0000)(\\d{4})-(0[1-9]|1[0-2])-[0-3]\\d\\s*")){
+                        System.out.println("Invalid date format. Operation cancelled");
+                        return;
+                    }
+
+                    this.output.addObject(c);
+                    this.output.addObject(command);
+                    this.output.addObject(user);
+
+                    break;
+                default:
+                    System.out.println("Unknown command");
+                    break;
+            }
+        } catch (UnknownCommandException | OperationCanceledException | InvalidDataException e) {
+            System.out.println(e.getMessage());
+            return;
+        }
+
+        System.out.println("------------------------------------");
+        try {
+            Messages messages =  new Messages();
+            //System.out.println("Message recieved");
+            messages = this.sendMessage1();
+
+            //System.out.println(messages.getObject(0));
+            if (messages.getObject(0).equals(Commands.NO_FEEDBACK)){
+                System.out.println(messages.getObject(1));
+            } else {
+                //System.out.println("needs feedback");
+                if (messages.getObject(0).equals(Commands.SIGN_UP) && messages.getObject(1).equals(true)){
+                    System.out.println("You successfully entered database");
+                }
+            }
+        } catch (Exception e) {
+            throw new NotConnectedException();
+        }
+        System.out.println("------------------------------------");
+    }
+
+    public Messages sendMessage1() throws Exception{
+        Messages feedback = null;
+        Objects.requireNonNull(out).writeObject(this.output);
+        try {
+            this.out.flush();
+        } catch (Exception e) {
+            System.out.println("Error while sending a message: " + e.getMessage());
+            throw e;
+        }
+        try {
+            feedback = (Messages) in.readObject();
+        } catch (Exception e) {
+            System.out.println("Error while getting feedback: " + e.getMessage());
+            throw e;
+        }
+        out.reset();
+        this.output.clear();
+        //System.out.println(feedback.getObject(1));
+        return feedback;
     }
 
     protected void updateByIdCommand(Commands command, String commandWithID){

@@ -2,18 +2,20 @@ package com.company.main;
 
 //variant 312709
 
+import com.company.Login.User;
 import com.company.database.DataBase;
 import com.company.database.Terminal;
 import com.company.exceptions.NotConnectedException;
 import com.company.exceptions.OperationCanceledException;
 import com.company.network.Client;
-import com.sun.javaws.IconUtil;
+import com.company.network.Messages;
+//import com.sun.javaws.IconUtil;
 
 import java.util.NoSuchElementException;
 
 public class Main {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         DataBase dataBase = new DataBase();
         boolean initializedFromFile = false;
         if (args.length == 0){
@@ -69,9 +71,30 @@ public class Main {
                 continue;
             }
 
+            boolean hasUser = false;
+            Messages messages = new Messages();
             while (true){
+                while (!hasUser){
+                    User user = new User();
+
+                    try {
+                        user.initiate();
+                    }catch (OperationCanceledException e){
+
+                    }
+                    client.user = user;
+                    System.out.println(client.user.getLogin());
+                    client.setUser();
+                    messages = client.sendMessage1();
+                    if (messages.getObject(1).equals(true)){
+                        hasUser = true;
+                    } else{
+                        System.out.println(messages.getObject(2));
+                    }
+                    //hasUser = true;
+                }
                 try {
-                    client.readCommand();
+                    client.readCommand1();
                 } catch (NotConnectedException e) {
                     System.out.println(e.getMessage());
                     isConnected = false;

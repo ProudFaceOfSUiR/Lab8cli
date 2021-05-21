@@ -1,6 +1,9 @@
 package com.company.enums;
 public enum Commands {
     //args should be in {} for better formatting
+    NO_FEEDBACK("",""),
+    SIGN_IN("",""),
+    SIGN_UP("",""),
     HELP ("","Available commands"),
     INFO ("","Information about current stat of Collection"),
     SHOW ("","Prints all the elements"),
