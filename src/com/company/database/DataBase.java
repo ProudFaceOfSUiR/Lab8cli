@@ -52,7 +52,7 @@ public class DataBase implements Serializable {
         System.out.println("------------------------------------");
 
         //reading from file
-        readFromFile(filePath);
+        //readFromFile(filePath);
     }
 
     /**
@@ -71,8 +71,8 @@ public class DataBase implements Serializable {
 
     /**
      * Reader from given file.
-     * @param filePath
-     */
+     * @param
+     *//*
     public void readFromFile(String filePath){
         //cancelling if not initialized
         if(!isInitialized){
@@ -91,7 +91,7 @@ public class DataBase implements Serializable {
             System.out.println(e.getMessage());
         }
     }
-
+*/
     public LinkedList<Worker> getDatabase(){
         return this.database;
     }

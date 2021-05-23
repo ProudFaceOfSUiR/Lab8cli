@@ -94,13 +94,14 @@ public class FileParser {
             return null;
         } else return p.normalize();
     }
+}
 
     /**
      * Parses XML file to LinkedList database
      * @param filepath
      * @return
      * @throws Exception
-     */
+     *//*
     public static LinkedList<Worker> xmlToDatabase(String filepath) throws Exception{
 
         if (!pathCheck(filepath)){
@@ -255,7 +256,7 @@ public class FileParser {
 
                     try {
                         //adding worker
-                        database.add(new Worker(name, salary, position, person, coordinates, startdate, endDate));
+                        database.add(new Worker(0,name, salary, position, person, coordinates, startdate, endDate,user));
                         successfullyAddedWorkers++;
                     } catch (Exception e){
                         System.out.println("Something went wrong while adding a new worker: " + e.getMessage());
@@ -272,4 +273,4 @@ public class FileParser {
             return null;
         }
     }
-}
+}*/

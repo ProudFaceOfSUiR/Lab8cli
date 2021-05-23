@@ -261,7 +261,6 @@ public class Client {
                 case SHOW:
                 case GROUP_COUNTING_BY_POSITION:
                     this.output.addObject(c);
-                    this.output.addObject(null);
                     this.output.addObject(user);
                     break;
                 case CLEAR:
@@ -291,7 +290,7 @@ public class Client {
                     if (Terminal.binaryChoice("delete worker from database")) {
                         this.output.addObject(c);
                         this.output.addObject(command);
-                        this.output.addObject(user);;
+                        this.output.addObject(user);
                     } else {
                         System.out.println("Operation cancelled");
                         return;
@@ -303,6 +302,8 @@ public class Client {
                     return;
                 case EXIT:
                     this.output.addObject(c);
+                    this.output.addObject(null);
+                    this.output.addObject(user);
                     try {
                         sendMessage();
                     } catch (Exception e) {

@@ -1,5 +1,6 @@
 package com.company.classes;
 
+import com.company.Login.User;
 import com.company.database.Terminal;
 import com.company.enums.Position;
 import com.company.exceptions.InvalidDataException;
@@ -17,7 +18,7 @@ public class Worker implements Serializable {
 
     private static final long serialVersionUID = 66L;
 
-    private Long id; //Поле не может быть null, Значение поля должно быть больше 0, Значение этого поля должно быть уникальным, Значение этого поля должно генерироваться автоматически
+    private int id; //Поле не может быть null, Значение поля должно быть больше 0, Значение этого поля должно быть уникальным, Значение этого поля должно генерироваться автоматически
     private String name; //Поле не может быть null, Строка не может быть пустой
     private Coordinates coordinates; //Поле не может быть null
     private java.time.ZonedDateTime creationDate; //Поле не может быть null, Значение этого поля должно генерироваться автоматически
@@ -26,9 +27,10 @@ public class Worker implements Serializable {
     private java.time.ZonedDateTime endDate; //Поле может быть null
     private Position position; //Поле может быть null
     private Person person; //Поле может быть null
+    private User user;
 
-    public Worker(String name, double salary, Position position, Person person, Coordinates coordinates,
-                   ZonedDateTime startDate, ZonedDateTime endDate) throws InvalidDataException{
+    public Worker(int ID, String name, double salary, Position position, Person person, Coordinates coordinates,
+                  ZonedDateTime startDate, ZonedDateTime endDate, User user) throws InvalidDataException{
         setName(name);
         setSalary(salary);
 
@@ -40,8 +42,10 @@ public class Worker implements Serializable {
 
         this.creationDate = ZonedDateTime.now();
 
-        Random random = new Random();
-        this.id = Math.abs(Long.parseLong(String.valueOf(random.nextLong() + creationDate.getSecond() + creationDate.getMinute() + creationDate.getHour()).substring(0,10)));
+        this.user = user;
+
+        //Random random = new Random();
+        this.id = ID;//Math.abs(Long.parseLong(String.valueOf(random.nextLong() + creationDate.getSecond() + creationDate.getMinute() + creationDate.getHour()).substring(0,10)));
 
     }
 
@@ -175,7 +179,7 @@ public class Worker implements Serializable {
 
     //getters and setters
 
-    public Long getId() {
+    public int getId() {
         return id;
     }
 
