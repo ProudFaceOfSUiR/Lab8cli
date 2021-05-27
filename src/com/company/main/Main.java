@@ -4,14 +4,11 @@ package com.company.main;
 
 import com.company.Login.User;
 import com.company.database.DataBase;
-import com.company.database.Terminal;
 import com.company.exceptions.NotConnectedException;
-import com.company.exceptions.OperationCanceledException;
 import com.company.network.Client;
 import com.company.network.Messages;
 //import com.sun.javaws.IconUtil;
 
-import java.util.NoSuchElementException;
 
 public class Main {
 
@@ -72,26 +69,24 @@ public class Main {
             }
 
             boolean hasUser = false;
-            Messages messages = new Messages();
+            Messages messages;
             while (true){
                 while (!hasUser){
                     User user = new User();
-
                     user.initiate();
-
                     client.user = user;
-                    System.out.println(client.user.getLogin());
                     client.setUser();
-                    messages = client.sendMessage1();
+
+                    messages = client.sendMessage();
                     if (messages.getObject(1).equals(true)){
                         hasUser = true;
+                        System.out.println("You have successfully logged in!");
                     } else{
                         System.out.println(messages.getObject(2));
                     }
-                    //hasUser = true;
                 }
                 try {
-                    client.readCommand1();
+                    client.readCommand();
                 } catch (NotConnectedException e) {
                     System.out.println(e.getMessage());
                     isConnected = false;

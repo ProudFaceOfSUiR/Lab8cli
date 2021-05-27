@@ -103,20 +103,20 @@ public class User implements Serializable {
             try {
                 if (Terminal.binaryChoice1("sign in", scanner)) {
                     System.out.println("Enter login");
-                    command = scanner.nextLine();
+                    command = Terminal.repeatInputAndExpectRegex("login","\\w+");
                     this.login = command;
                     System.out.println("Enter password");
-                    command = scanner.nextLine();
+                    command = Terminal.repeatInputAndExpectRegex("password","\\w+");
                     this.password = command;
-                    if (!this.login.equals(null)||this.password.equals(null)) {
+                    if (this.login != null || this.password == null) {
                         done = true;
                         newUser = false;
                     }
-                } else if (!done && Terminal.binaryChoice1("sign up",scanner)) {
+                } else if (Terminal.binaryChoice1("sign up",scanner)) {
                     System.out.println("Enter login");
-                    this.login = scanner.nextLine();
+                    this.login = Terminal.repeatInputAndExpectRegex("login","\\w+");
                     System.out.println("Enter password");
-                    this.password = scanner.nextLine();
+                    this.password = Terminal.repeatInputAndExpectRegex("login","\\w+");
                     if (!this.login.equals(null)||this.password.equals(null)) {
                         done = true;
                         newUser = true;

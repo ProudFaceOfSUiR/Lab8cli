@@ -13,7 +13,6 @@ import com.company.exceptions.UnknownCommandException;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Scanner;
 
@@ -31,14 +30,14 @@ public class Client {
     private int recursionCounter;
 
     public void setUser(){
+        this.output.addObject(this.user);
         if (this.user.getNew()) {
             this.output.addObject(Commands.SIGN_UP);
-            this.output.addObject(this.user);
         }
         else{
             this.output.addObject(Commands.SIGN_IN);
-            this.output.addObject(this.user);
         }
+
     }
 
     public void setOutputUser() {
@@ -83,26 +82,6 @@ public class Client {
         return true;
     }
 
-    public String sendMessage() throws Exception{
-        String feedback = null;
-        Objects.requireNonNull(out).writeObject(this.output);
-        try {
-            this.out.flush();
-        } catch (Exception e) {
-            System.out.println("Error while sending a message: " + e.getMessage());
-            throw e;
-        }
-        try {
-            feedback = (String) ((Messages) in.readObject()).getObject(0);
-        } catch (Exception e) {
-            System.out.println("Error while getting feedback: " + e.getMessage());
-            throw e;
-        }
-        out.reset();
-        this.output.clear();
-        return feedback;
-    }
-
     public void fillFromFile(){
         try {
             this.output.addObject(Commands.FILL_FROM_FILE);
@@ -131,6 +110,8 @@ public class Client {
             //getting command
             c = Terminal.matchCommand(command);
 
+            this.output.addObject(user);
+
             switch (c) {
                 case HELP:
                 case INFO:
@@ -149,7 +130,10 @@ public class Client {
                 case ADD_IF_MAX:
                     this.output.addObject(c);
                     Worker.WorkerBuilderFromTerminal wb = new Worker.WorkerBuilderFromTerminal();
-                    this.output.addObject(wb.build());
+                    Worker w = wb.build(user);
+                    this.output.addObject(w);
+                    System.out.println("HERE IS USER");
+                    System.out.println(w.getUser().getLogin());
                     break;
                 case UPDATE:
                     updateByIdCommand(c, command);
@@ -163,134 +147,6 @@ public class Client {
                     if (Terminal.binaryChoice("delete worker from database")) {
                         this.output.addObject(c);
                         this.output.addObject(command);
-                    } else {
-                        System.out.println("Operation cancelled");
-                        return;
-                    }
-                    break;
-                case EXECUTE_SCRIPT:
-                    executeScriptCommand(command);
-                    return;
-                case EXIT:
-                    this.output.addObject(c);
-                    try {
-                        sendMessage();
-                    } catch (Exception e) {
-                        System.out.println(e.getMessage());
-                    }
-                    System.exit(1);
-                    break;
-                case REMOVE_GREATER:
-                case REMOVE_LOWER:
-                    if (!command.matches("\\s*\\w+\\s+\\d+\\s*")){
-                        System.out.println("Invalid salary format. Operation cancelled");
-                        return;
-                    }
-
-                    if (Terminal.binaryChoice("remove these workers")) {
-                        this.output.addObject(c);
-                        this.output.addObject(command);
-                    } else {
-                        System.out.println("Operation cancelled");
-                        return;
-                    }
-                    break;
-                case COUNT_LESS_THAN_START_DATE:
-                    command = Terminal.removeString(command, "count_less_than_start_date");
-                    if (!command.matches("\\s*(?!0000)(\\d{4})-(0[1-9]|1[0-2])-[0-3]\\d\\s*")){
-                        System.out.println("Invalid date format. Operation cancelled");
-                        return;
-                    }
-
-                    this.output.addObject(c);
-                    this.output.addObject(command);
-
-                    break;
-                case FILTER_GREATER_THAN_START_DATE:
-                    command = Terminal.removeString(command, "filter_greater_than_start_date");
-                    if (!command.matches("\\s*(?!0000)(\\d{4})-(0[1-9]|1[0-2])-[0-3]\\d\\s*")){
-                        System.out.println("Invalid date format. Operation cancelled");
-                        return;
-                    }
-
-                    this.output.addObject(c);
-                    this.output.addObject(command);
-
-                    break;
-                default:
-                    System.out.println("Unknown command");
-                    break;
-            }
-        } catch (UnknownCommandException | OperationCanceledException | InvalidDataException e) {
-            System.out.println(e.getMessage());
-            return;
-        }
-
-        System.out.println("------------------------------------");
-        try {
-            System.out.println(sendMessage());
-        } catch (Exception e) {
-            throw new NotConnectedException();
-        }
-        System.out.println("------------------------------------");
-    }
-
-
-
-    public void readCommand1() throws NotConnectedException {
-        Commands c;
-        //check when we read from file
-        if (!terminal.hasNext()) {
-            return;
-        }
-
-        //reading command
-        this.command = terminal.nextLine();
-        this.command = command.toLowerCase();
-
-        //skip empty line
-        if (command.trim().isEmpty()) return;
-
-        try {
-            //getting command
-            c = Terminal.matchCommand(command);
-
-            switch (c) {
-                case HELP:
-                case INFO:
-                case SHOW:
-                case GROUP_COUNTING_BY_POSITION:
-                    this.output.addObject(c);
-                    this.output.addObject(user);
-                    break;
-                case CLEAR:
-                    if (Terminal.binaryChoice("clear the database")){
-                        this.output.addObject(c);
-                        this.output.addObject(user);
-                    } else {
-                        System.out.println("Operation cancelled");
-                    }
-                    break;
-                case ADD:
-                case ADD_IF_MAX:
-                    this.output.addObject(c);
-                    Worker.WorkerBuilderFromTerminal wb = new Worker.WorkerBuilderFromTerminal();
-                    this.output.addObject(wb.build());
-                    this.output.addObject(user);
-                    break;
-                case UPDATE:
-                    updateByIdCommand(c, command);
-                    return;
-                case REMOVE_BY_ID:
-                    if (!command.matches("\\s*\\w+\\s+\\d+\\s*")){
-                        System.out.println("Invalid id format. Operation cancelled");
-                        return;
-                    }
-
-                    if (Terminal.binaryChoice("delete worker from database")) {
-                        this.output.addObject(c);
-                        this.output.addObject(command);
-                        this.output.addObject(user);
                     } else {
                         System.out.println("Operation cancelled");
                         return;
@@ -303,7 +159,6 @@ public class Client {
                 case EXIT:
                     this.output.addObject(c);
                     this.output.addObject(null);
-                    this.output.addObject(user);
                     try {
                         sendMessage();
                     } catch (Exception e) {
@@ -321,7 +176,6 @@ public class Client {
                     if (Terminal.binaryChoice("remove these workers")) {
                         this.output.addObject(c);
                         this.output.addObject(command);
-                        this.output.addObject(user);
                     } else {
                         System.out.println("Operation cancelled");
                         return;
@@ -336,7 +190,6 @@ public class Client {
 
                     this.output.addObject(c);
                     this.output.addObject(command);
-                    this.output.addObject(user);
 
                     break;
                 case FILTER_GREATER_THAN_START_DATE:
@@ -348,7 +201,6 @@ public class Client {
 
                     this.output.addObject(c);
                     this.output.addObject(command);
-                    this.output.addObject(user);
 
                     break;
                 default:
@@ -364,7 +216,7 @@ public class Client {
         try {
             Messages messages =  new Messages();
             //System.out.println("Message recieved");
-            messages = this.sendMessage1();
+            messages = this.sendMessage();
 
             //System.out.println(messages.getObject(0));
             if (messages.getObject(0).equals(Commands.NO_FEEDBACK)){
@@ -381,7 +233,7 @@ public class Client {
         System.out.println("------------------------------------");
     }
 
-    public Messages sendMessage1() throws Exception{
+    public Messages sendMessage() throws Exception{
         Messages feedback = null;
         Objects.requireNonNull(out).writeObject(this.output);
         try {
@@ -459,7 +311,7 @@ public class Client {
         //sending worker
         try {
             System.out.println(this.out);
-            System.out.println(sendMessage1());
+            System.out.println(sendMessage());
         } catch (Exception ignored) {
 
         }

@@ -49,6 +49,9 @@ public class Worker implements Serializable {
 
     }
 
+    public User getUser() {
+        return user;
+    }
 
     //private constructor for WorkerBuilder
     private Worker(){
@@ -66,7 +69,8 @@ public class Worker implements Serializable {
         public WorkerBuilderFromTerminal() {
         }
 
-        public Worker build() throws OperationCanceledException, InvalidDataException{
+        public Worker build(User user) throws OperationCanceledException, InvalidDataException{
+            worker.user = user;
             setName();
             setSalary();
             setPosition();
@@ -79,7 +83,7 @@ public class Worker implements Serializable {
         //protected methods for terminal input
 
         protected void setName() throws InvalidDataException, OperationCanceledException{
-            System.out.println("Please, write the name of a new worker (String, not Null): ");
+            System.out.println("Please, write the name of a new worker: ");
             worker.setName(
                     Terminal.removeSpaces(
                             Terminal.repeatInputAndExpectRegex("name", "\\s*\\p{L}+\\s*")
@@ -88,7 +92,7 @@ public class Worker implements Serializable {
         }
 
         protected void setSalary() throws InvalidDataException, OperationCanceledException{
-            System.out.println("PLease, input " + worker.getName() + "'s salary (double, not null, >0): ");
+            System.out.println("PLease, input " + worker.getName() + "'s salary (>0): ");
             worker.setSalary(
                     Double.parseDouble(
                             Terminal.removeSpaces(
@@ -100,7 +104,7 @@ public class Worker implements Serializable {
         protected void setPosition() throws OperationCanceledException{
             System.out.println("Please, write " + worker.getName() + "'s position " + Arrays.toString(Arrays.stream(Position.getPositions()).toArray()) + ": ");
 
-            String s = Terminal.repeatInputAndExpectRegexOrNull("position","\\s*\\w+\\s*");
+            String s = Terminal.repeatInputAndExpectRegex("position","\\s*\\w+\\s*");
 
             while (s != null && Position.findEnum(s) == null){
                 System.out.println("Incorrect position. Please, try again: ");
@@ -114,14 +118,14 @@ public class Worker implements Serializable {
             Person person = new Person();
             System.out.println("PLease, write " + worker.getName() + "'s height (Long, >0): ");
             try {
-                person.setHeight(Long.valueOf(Terminal.repeatInputAndExpectRegexOrNull("height", "\\s*[0-9]+\\s*")));
+                person.setHeight(Long.valueOf(Terminal.repeatInputAndExpectRegex("height", "\\s*[0-9]+\\s*")));
             } catch (Exception e){
                 //pass, because Person is already null
             }
 
             System.out.println("PLease, write " + worker.getName() + "'s weight (Integer, >0): ");
             try {
-                person.setWeight((int) Long.parseLong(Terminal.repeatInputAndExpectRegexOrNull("weight", "\\s*[0-9]+\\s*")));
+                person.setWeight((int) Long.parseLong(Terminal.repeatInputAndExpectRegex("weight", "\\s*[0-9]+\\s*")));
             } catch (Exception e){
                 //pass
             }
@@ -129,7 +133,7 @@ public class Worker implements Serializable {
         }
 
         protected void setCoordinates() throws OperationCanceledException{
-            System.out.println("PLease, input " + worker.getName() + "'s coordinates (not null): ");
+            System.out.println("PLease, input " + worker.getName() + "'s coordinates: ");
             Coordinates c = new Coordinates(0,0);
 
             try {
@@ -154,7 +158,7 @@ public class Worker implements Serializable {
         }
 
         protected void setDates() throws OperationCanceledException{
-            System.out.println("Please, write the start day (yyyy-mm-dd) (not null): ");
+            System.out.println("Please, write the start day (yyyy-mm-dd): ");
 
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
             LocalDate date = LocalDate.parse(Terminal.removeSpaces(Terminal.repeatInputAndExpectRegex(
@@ -165,7 +169,7 @@ public class Worker implements Serializable {
             System.out.println("Please, write the end day (yyyy-mm-dd): ");
             String enddate;
             enddate = Terminal.removeSpaces(
-                    Terminal.repeatInputAndExpectRegexOrNull("end day", "\\s*(?!0000)(\\d{4})-(0[1-9]|1[0-2])-[0-3]\\d\\s*")
+                    Terminal.repeatInputAndExpectRegex("end day", "\\s*(?!0000)(\\d{4})-(0[1-9]|1[0-2])-[0-3]\\d\\s*")
             );
             if (enddate == null){
                 worker.setEndDate(null);
