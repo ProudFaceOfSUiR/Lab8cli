@@ -11,6 +11,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Scanner;
 
 public class User implements Serializable {
+    private static final long serialVersionUID = 60L;
     private String password;
     private String login;
     private boolean newUser;
@@ -63,24 +64,68 @@ public class User implements Serializable {
         }else {return false;}
     }
 
-    public void initiate() throws OperationCanceledException {
+    public void initiate2(){
         Scanner scanner = new Scanner(System.in);
         boolean done = false;
-        while(!done) {
-            if (Terminal.binaryChoice("sign in")) {
+        String command;
+        while(!done){
+            System.out.println("Are you sure you want to sign in? (Yes/No)");
+            command = scanner.nextLine();
+            command.toLowerCase();
+            if (command.equals("yes")){
                 System.out.println("Enter login");
                 this.login = scanner.nextLine();
                 System.out.println("Enter password");
                 this.password = scanner.nextLine();
                 done = true;
                 newUser = false;
-            } else if(!done && Terminal.binaryChoice("sign up")){
-                System.out.println("Enter login");
-                this.login = scanner.nextLine();
-                System.out.println("Enter password");
-                this.password = scanner.nextLine();
-                done = true;
-                newUser = true;
+            } else if (command.equals("no")){
+                System.out.println("Are you sure you want to sign up? (Yes/No)");
+                command = scanner.nextLine();
+                command.toLowerCase();
+                if (command.equals("yes")){
+                    System.out.println("Enter login");
+                    this.login = scanner.nextLine();
+                    System.out.println("Enter password");
+                    this.password = scanner.nextLine();
+                    done = true;
+                    newUser = true;
+                }
+            }
+        }
+    }
+
+    public void initiate() {
+        Scanner scanner = new Scanner(System.in);
+        boolean done = false;
+        String command;
+        while(!done) {
+            try {
+                if (Terminal.binaryChoice1("sign in", scanner)) {
+                    System.out.println("Enter login");
+                    command = scanner.nextLine();
+                    this.login = command;
+                    System.out.println("Enter password");
+                    command = scanner.nextLine();
+                    this.password = command;
+                    if (!this.login.equals(null)||this.password.equals(null)) {
+                        done = true;
+                        newUser = false;
+                    }
+                } else if (!done && Terminal.binaryChoice1("sign up",scanner)) {
+                    System.out.println("Enter login");
+                    this.login = scanner.nextLine();
+                    System.out.println("Enter password");
+                    this.password = scanner.nextLine();
+                    if (!this.login.equals(null)||this.password.equals(null)) {
+                        done = true;
+                        newUser = true;
+                    }
+                }
+            } catch (OperationCanceledException e){
+                scanner.close();
+                scanner = new Scanner(System.in);
+                System.out.println("Unknown command");
             }
         }
 

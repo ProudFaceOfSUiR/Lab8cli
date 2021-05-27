@@ -10,7 +10,7 @@ import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 public class Terminal {
-    private static Scanner terminal = new Scanner(System.in);
+    public static Scanner terminal = new Scanner(System.in);
 
     /**
      * Changes scanner (it's needed when we execute script
@@ -80,6 +80,28 @@ public class Terminal {
             binaryChoice(move);
         }
         return false;
+    }
+    public static boolean binaryChoice1(String move, Scanner scanner) throws OperationCanceledException{
+        System.out.println("Are you sure you want to " + move + "? (Yes/No)");
+
+        String command;
+
+        try {
+            command = scanner.nextLine();
+            System.out.println(command);
+        } catch (NoSuchElementException e){
+            return false;
+            //throw new OperationCanceledException();
+        }
+        command = command.toUpperCase();
+        if (command.matches("\\s*YES\\s*\\w*\\s*")){
+            return true;
+        } else if (command.matches("\\s*NO\\s*\\w*\\s*")){
+            return false;
+        } else {
+            return (binaryChoice1(move,scanner));
+        }
+
     }
 
     /**

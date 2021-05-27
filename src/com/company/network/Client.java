@@ -412,7 +412,7 @@ public class Client {
             return;
         }
 
-        long id = Long.parseLong(commandWithID);
+        int id = Integer.parseInt(commandWithID);
 
         this.output.addObject(command);
         this.output.addObject(id);
@@ -458,8 +458,11 @@ public class Client {
 
         //sending worker
         try {
-            System.out.println(sendMessage());
-        } catch (Exception ignored) {}
+            System.out.println(this.out);
+            System.out.println(sendMessage1());
+        } catch (Exception ignored) {
+
+        }
     }
 
     public void executeScriptCommand(String commandWithFilename){

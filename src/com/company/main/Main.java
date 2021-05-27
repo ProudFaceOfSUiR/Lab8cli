@@ -77,11 +77,8 @@ public class Main {
                 while (!hasUser){
                     User user = new User();
 
-                    try {
-                        user.initiate();
-                    }catch (OperationCanceledException e){
+                    user.initiate();
 
-                    }
                     client.user = user;
                     System.out.println(client.user.getLogin());
                     client.setUser();
