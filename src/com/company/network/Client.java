@@ -132,7 +132,6 @@ public class Client {
                     Worker.WorkerBuilderFromTerminal wb = new Worker.WorkerBuilderFromTerminal();
                     Worker w = wb.build(user);
                     this.output.addObject(w);
-                    System.out.println("HERE IS USER");
                     System.out.println(w.getUser().getLogin());
                     break;
                 case UPDATE:
@@ -264,7 +263,7 @@ public class Client {
             return;
         }
 
-        int id = Integer.parseInt(commandWithID);
+        long id = Long.parseLong(commandWithID);
 
         this.output.addObject(command);
         this.output.addObject(id);
@@ -290,8 +289,8 @@ public class Client {
         }
 
         //aborting if response is string (== error)
-        if (response.getObject(0).getClass().equals(String.class)){
-            System.out.println(response.getObject(0));
+        if (response.getObject(1).getClass().equals(String.class)){
+            System.out.println(response.getObject(1));
             return;
         }
 
@@ -299,7 +298,7 @@ public class Client {
         try {
             this.output.addObject(
                     this.dataBase.updateElement(
-                            (Worker)(response.getObject(0)
+                            (Worker)(response.getObject(1)
                         )
                     )
             );
@@ -310,8 +309,7 @@ public class Client {
 
         //sending worker
         try {
-            System.out.println(this.out);
-            System.out.println(sendMessage());
+            System.out.println(sendMessage().getObject(1));
         } catch (Exception ignored) {
 
         }

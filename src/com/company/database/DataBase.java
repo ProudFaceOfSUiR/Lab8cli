@@ -116,7 +116,7 @@ public class DataBase implements Serializable {
             case NAME:
                 System.out.println("Please, type the new name: ");
                 try {
-                    workerToUpdate.setName(Terminal.removeSpaces(Terminal.repeatInputAndExpectRegex("name", "\\s*\\w+\\s*")) );
+                    workerToUpdate.setName(Terminal.removeSpaces(Terminal.repeatInputAndExpectRegex("name", "\\s*\\p{L}+\\s*")) );
                 } catch (InvalidDataException | OperationCanceledException e) {
                     System.out.println(e.getMessage());
                     return null;
@@ -137,7 +137,7 @@ public class DataBase implements Serializable {
                 System.out.println("Please, type the new position " + Arrays.toString(Position.values()) + ": ");
                 Position newPosition;
                 try {
-                    newPosition = Position.findEnum(Terminal.removeSpaces(Terminal.repeatInputAndExpectRegexOrNull("position", "\\s*\\w+\\s*")));
+                    newPosition = Position.findEnum(Terminal.removeSpaces(Terminal.repeatInputAndExpectRegex("position", "\\s*\\w+\\s*")));
                 } catch (OperationCanceledException e) {
                     System.out.println(e.getMessage());
                     return null;
@@ -149,14 +149,14 @@ public class DataBase implements Serializable {
                 System.out.println("PLease, type the new height: ");
                 Person person = new Person();
                 try {
-                    person.setHeight(Long.valueOf(Terminal.repeatInputAndExpectRegexOrNull("height", "\\s*[0-9]+\\s*")));
+                    person.setHeight(Long.valueOf(Terminal.repeatInputAndExpectRegex("height", "\\s*[0-9]+\\s*")));
                 } catch (Exception e){
                     //pass, because Person is already null
                 }
 
                 System.out.println("PLease, type the new weight: ");
                 try {
-                    person.setWeight((int) Long.parseLong(Terminal.repeatInputAndExpectRegexOrNull("weight", "\\s*[0-9]+\\s*")));
+                    person.setWeight((int) Long.parseLong(Terminal.repeatInputAndExpectRegex("weight", "\\s*[0-9]+\\s*")));
                 } catch (Exception e){
                     //pass
                 }
@@ -210,7 +210,7 @@ public class DataBase implements Serializable {
                 String enddate;
                 try {
                     enddate = Terminal.removeSpaces(
-                            Terminal.repeatInputAndExpectRegexOrNull("end day", "\\s*(?!0000)(\\d{4})-(0[1-9]|1[0-2])-[0-3]\\d\\s*")
+                            Terminal.repeatInputAndExpectRegex("end day", "\\s*(?!0000)(\\d{4})-(0[1-9]|1[0-2])-[0-3]\\d\\s*")
                     );
                 } catch (OperationCanceledException e) {
                     System.out.println(e.getMessage());

@@ -88,7 +88,6 @@ public class Terminal {
 
         try {
             command = scanner.nextLine();
-            System.out.println(command);
         } catch (NoSuchElementException e){
             return false;
             //throw new OperationCanceledException();
