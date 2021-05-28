@@ -132,7 +132,6 @@ public class Client {
                     Worker.WorkerBuilderFromTerminal wb = new Worker.WorkerBuilderFromTerminal();
                     Worker w = wb.build(user);
                     this.output.addObject(w);
-                    System.out.println(w.getUser().getLogin());
                     break;
                 case UPDATE:
                     updateByIdCommand(c, command);
@@ -152,6 +151,7 @@ public class Client {
                     }
                     break;
                 case EXECUTE_SCRIPT:
+                    this.output.clear();
                     executeScriptCommand(command);
                     //this.output.addObject(user);
                     return;
