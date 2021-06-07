@@ -59,10 +59,14 @@ public class Worker implements Serializable {
         this.creationDate = ZonedDateTime.now();
     }
 
+
+
     /**
      * Builder for terminal input. Includes all the souts etc
      */
     public static class WorkerBuilderFromTerminal {
+
+
 
         private Worker worker = new Worker();
 

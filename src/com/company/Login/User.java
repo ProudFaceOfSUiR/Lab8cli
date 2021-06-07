@@ -14,8 +14,16 @@ public class User implements Serializable {
     private static final long serialVersionUID = 60L;
     private String password;
     private String login;
-    private boolean newUser;
+    public boolean newUser;
     private int id;
+
+    public User() {
+    }
+
+    public User(String login, String password) {
+        this.password = password;
+        this.login = login;
+    }
 
     public boolean getNew(){
         return this.newUser;

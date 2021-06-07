@@ -37,23 +37,7 @@ public class DataBase implements Serializable {
 
     //public methods
 
-    /**
-     * Initializing database (like constructor)
-     * @param filePath
-     */
-    public void initialize(String filePath){
-        //initializing variables
-        this.database = new LinkedList<>();
-        this.terminal = new Scanner(System.in);
-        this.initializationTime = ZonedDateTime.now();
-        this.isInitialized = true;
 
-        System.out.println("Client's database has been initialized");
-        System.out.println("------------------------------------");
-
-        //reading from file
-        //readFromFile(filePath);
-    }
 
     /**
      * Initializing database (like constructor), but without a file (if it's not given)
@@ -65,33 +49,10 @@ public class DataBase implements Serializable {
         this.initializationTime = ZonedDateTime.now();
         this.isInitialized = true;
 
-        System.out.println("Client's database has been initialized without file");
+        System.out.println("Client's database has been initialized.");
         System.out.println("------------------------------------");
     }
 
-    /**
-     * Reader from given file.
-     * @param
-     *//*
-    public void readFromFile(String filePath){
-        //cancelling if not initialized
-        if(!isInitialized){
-            System.out.println("DataBase hasn't been initialized! Cancelling...");
-            return;
-        }
-
-        //parsing
-        try {
-            LinkedList<Worker> databaseFromXML = FileParser.xmlToDatabase(filePath);
-
-            if (!databaseFromXML.isEmpty()){
-                this.database = databaseFromXML;
-            }
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
-    }
-*/
     public LinkedList<Worker> getDatabase(){
         return this.database;
     }

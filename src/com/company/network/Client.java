@@ -19,7 +19,7 @@ import java.util.Scanner;
 public class Client {
     private Socket client;
     private Scanner terminal;
-    private Messages output;
+    public Messages output;
     private ObjectOutputStream out;
     private ObjectInputStream in;
     public User user;
@@ -92,24 +92,8 @@ public class Client {
         }
     }
 
-    public void readCommand() throws NotConnectedException {
-        Commands c;
-        //check when we read from file
-        if (!terminal.hasNext()) {
-            return;
-        }
-
-        //reading command
-        this.command = terminal.nextLine();
-        this.command = command.toLowerCase();
-
-        //skip empty line
-        if (command.trim().isEmpty()) return;
-
+    public Object readCommand(Commands c) throws NotConnectedException {
         try {
-            //getting command
-            c = Terminal.matchCommand(command);
-
             this.output.addObject(user);
 
             switch (c) {
@@ -135,11 +119,11 @@ public class Client {
                     break;
                 case UPDATE:
                     updateByIdCommand(c, command);
-                    return;
+                    return null;
                 case REMOVE_BY_ID:
                     if (!command.matches("\\s*\\w+\\s+\\d+\\s*")){
                         System.out.println("Invalid id format. Operation cancelled");
-                        return;
+                        return null;
                     }
 
                     if (Terminal.binaryChoice("delete worker from database")) {
@@ -147,14 +131,14 @@ public class Client {
                         this.output.addObject(command);
                     } else {
                         System.out.println("Operation cancelled");
-                        return;
+                        return null;
                     }
                     break;
                 case EXECUTE_SCRIPT:
                     this.output.clear();
-                    executeScriptCommand(command);
+                    //executeScriptCommand(command);
                     //this.output.addObject(user);
-                    return;
+                    return null;
                 case EXIT:
                     this.output.addObject(c);
                     this.output.addObject(null);
@@ -169,7 +153,7 @@ public class Client {
                 case REMOVE_LOWER:
                     if (!command.matches("\\s*\\w+\\s+\\d+\\s*")){
                         System.out.println("Invalid salary format. Operation cancelled");
-                        return;
+                        return null;
                     }
 
                     if (Terminal.binaryChoice("remove these workers")) {
@@ -177,14 +161,14 @@ public class Client {
                         this.output.addObject(command);
                     } else {
                         System.out.println("Operation cancelled");
-                        return;
+                        return null;
                     }
                     break;
                 case COUNT_LESS_THAN_START_DATE:
                     command = Terminal.removeString(command, "count_less_than_start_date");
                     if (!command.matches("\\s*(?!0000)(\\d{4})-(0[1-9]|1[0-2])-[0-3]\\d\\s*")){
                         System.out.println("Invalid date format. Operation cancelled");
-                        return;
+                        return null;
                     }
 
                     this.output.addObject(c);
@@ -195,7 +179,7 @@ public class Client {
                     command = Terminal.removeString(command, "filter_greater_than_start_date");
                     if (!command.matches("\\s*(?!0000)(\\d{4})-(0[1-9]|1[0-2])-[0-3]\\d\\s*")){
                         System.out.println("Invalid date format. Operation cancelled");
-                        return;
+                        return null;
                     }
 
                     this.output.addObject(c);
@@ -206,30 +190,19 @@ public class Client {
                     System.out.println("Unknown command");
                     break;
             }
-        } catch (UnknownCommandException | OperationCanceledException | InvalidDataException e) {
+        } catch (OperationCanceledException | InvalidDataException e) {
             System.out.println(e.getMessage());
-            return;
+            return null;
         }
 
-        System.out.println("------------------------------------");
+        Messages messages =  new Messages();
+        //System.out.println("Message recieved");
         try {
-            Messages messages =  new Messages();
-            //System.out.println("Message recieved");
             messages = this.sendMessage();
-
-            //System.out.println(messages.getObject(0));
-            if (messages.getObject(0).equals(Commands.NO_FEEDBACK)){
-                System.out.println(messages.getObject(1));
-            } else {
-                //System.out.println("needs feedback");
-                if (messages.getObject(0).equals(Commands.SIGN_UP) && messages.getObject(1).equals(true)){
-                    System.out.println("You successfully entered database");
-                }
-            }
         } catch (Exception e) {
-            throw new NotConnectedException();
+            e.printStackTrace();
         }
-        System.out.println("------------------------------------");
+        return messages;
     }
 
     public Messages sendMessage() throws Exception{
@@ -315,6 +288,7 @@ public class Client {
         }
     }
 
+    /*
     public void executeScriptCommand(String commandWithFilename){
         //removing spaces and "remove" word to turn into long
         commandWithFilename = Terminal.removeString(commandWithFilename, "execute_script") + ".txt";
@@ -364,4 +338,6 @@ public class Client {
         this.terminal = new Scanner(System.in);
         Terminal.changeScanner(this.terminal);
     }
+
+     */
 }
