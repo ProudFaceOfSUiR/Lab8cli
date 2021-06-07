@@ -167,9 +167,6 @@ public class DataBasePanel extends GeneralPanel{
         //add the table to the frame
         databaseWindow.add(jScrollPane);
 
-        FlowLayout footer = new FlowLayout();
-        JPanel footerPanel = new JPanel(footer);
-
         JButton addWorkerButton = new JButton("Add worker");
         addWorkerButton.addActionListener(new ActionListener() {
             @Override
@@ -288,15 +285,32 @@ public class DataBasePanel extends GeneralPanel{
             }
         });
 
+        JButton refreshButton = new JButton("Refresh");
+        refreshButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                updateTable();
+            }
+        });
+
+        FlowLayout footer = new FlowLayout();
+        JPanel footerPanel = new JPanel(footer);
+
         footerPanel.add(addWorkerButton);
         footerPanel.add(removeSelectedButton);
         footerPanel.add(removeGreaterButton);
         footerPanel.add(removeLowerButton);
         footerPanel.add(updateSelectedButton);
         footerPanel.add(clearButton);
-        footerPanel.add(visualisationButton);
+
+        FlowLayout footer2 = new FlowLayout();
+        JPanel footerPanel2 = new JPanel(footer2);
+
+        footerPanel2.add(visualisationButton);
+        footerPanel2.add(refreshButton);
 
         databaseWindow.add(footerPanel);
+        databaseWindow.add(footerPanel2);
 
         databaseWindow.revalidate();
         return databaseWindow;

@@ -387,12 +387,12 @@ public class AddWorkerPanel extends GeneralPanel{
                                 Double.parseDouble(salary),
                                 position,
                                 new Person(
-                                        Long.parseLong(personality.substring(0,personality.indexOf(","))),
-                                        Integer.parseInt(personality.substring(personality.length() - personality.indexOf(","))
-                                )),
+                                        Long.parseLong(personality.split(",")[0]),
+                                        Integer.parseInt(personality.split(",")[1])
+                                ),
                                 new Coordinates(
-                                        Long.parseLong(coordinates.substring(0,coordinates.indexOf(","))),
-                                        Integer.parseInt(coordinates.substring(coordinates.length() - coordinates.indexOf(","))
+                                        Long.parseLong(coordinates.split(",")[0]),
+                                        Integer.parseInt(coordinates.split(",")[1]
                                 )),
                                 sdate.atStartOfDay(ZoneId.systemDefault()),
                                 sdate.atStartOfDay(ZoneId.systemDefault()),

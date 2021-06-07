@@ -14,6 +14,7 @@ import com.company.network.Messages;
 public class Main {
 
     public static void main(String[] args) throws Exception {
+
         DataBase dataBase = new DataBase();
         dataBase.initialize();
 
@@ -21,7 +22,7 @@ public class Main {
         Client client = new Client(dataBase);
 
         MainFrame mainFrame = new MainFrame(dataBase, client);
-
+        mainFrame.loading();
 
         //connecting and merging databases
         boolean isConnected = client.connectToServer();

@@ -51,10 +51,27 @@ public class MainFrame extends GeneralFrame {
             }
         };
         this.addWindowListener(exitListener);
+
+        this.setWindowSize(800, 600);
+        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setScreenSize();
+        this.setBounds(screenWidth/2 - 350, screenHeigth/2-300, width,heigth);
+        this.setTitle("Devil's Database");
+        c = this.getContentPane();
+        cards = new CardLayout(0, 0);
+        c.setLayout(cards);
+    }
+
+    public void loading(){
+        ImageIcon loading = new ImageIcon("ajax-loader.gif");
+        BorderLayout borderLayout = new BorderLayout();
+        JPanel loadingPanel = new JPanel(borderLayout);
+        loadingPanel.add(new JLabel("connecting... ", loading, JLabel.CENTER),BorderLayout.CENTER);
+        c.add(loadingPanel, "loading");
+        this.setVisible(true);
     }
 
     public void run(){
-        c = this.getContentPane();
         loginPanel = new LoginPanel(this,c, client);
         loginPanel.initializeLoginFrame();
         dataBasePanel = new DataBasePanel(this,c,client);
@@ -64,16 +81,8 @@ public class MainFrame extends GeneralFrame {
         updateWorkerPanel = new UpdateWorkerPanel(this,c);
         visualisationPanel = new VisualisationPanel(this, c);
 
-        this.setWindowSize(800, 600);
-        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setScreenSize();
-        this.setBounds(screenWidth/2 - 250, screenHeigth/2-250, width,heigth);
-        this.setTitle("Devil's Database");
-
-        cards = new CardLayout(0, 0);
-        c.setLayout(cards);
-
         c.add(loginPanel, "login");
+        cards.next(c);
         c.add(dataBasePanel, "database");
         c.add(addWorkerPanel, "addworker");
         c.add(updateWorkerPanel, "updateworker");
