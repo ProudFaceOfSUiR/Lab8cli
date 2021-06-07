@@ -364,7 +364,7 @@ public class AddWorkerPanel extends GeneralPanel{
                 }
 
                 String endDate = endDateField.getText();
-                if (!startDate.matches("\\s*(?!0000)(\\d{4})-(0[1-9]|1[0-2])-[0-3]\\d\\s*")){
+                if (!endDate.matches("\\s*(?!0000)(\\d{4})-(0[1-9]|1[0-2])-[0-3]\\d\\s*")){
                     message.append("Invalid end date").append("; ");
                     endDateField.setText("");
                     endDateLabel.setForeground(Color.RED);

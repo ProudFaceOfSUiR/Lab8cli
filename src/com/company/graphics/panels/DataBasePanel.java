@@ -121,12 +121,15 @@ public class DataBasePanel extends GeneralPanel{
         informationArea.setMaximumSize(new Dimension(250, 50));
         informationArea.setEditable(false);
 
+
         String message = "message";
         messageArea = new JTextArea(message);
         messageArea.setMinimumSize(new Dimension(250, 50));
         messageArea.setPreferredSize(new Dimension(250, 50));
         messageArea.setMaximumSize(new Dimension(250, 50));
         messageArea.setEditable(false);
+        messageArea.setLineWrap(true);
+        messageArea.setWrapStyleWord(true);
 
         JPanel userP = new JPanel();
         BoxLayout userLayout = new BoxLayout(userP,BoxLayout.Y_AXIS);
@@ -183,8 +186,18 @@ public class DataBasePanel extends GeneralPanel{
                 int row = table.getSelectedRow();
                 String value = table.getModel().getValueAt(row, column).toString();
                 long id = Long.parseLong(value);
-                System.out.println(id);
-                //todo sending
+
+                client.output.addObject(client.user);
+                client.output.addObject(Commands.REMOVE_BY_ID);
+                client.output.addObject(String.valueOf(id));
+
+                try {
+                    input = client.sendMessage();
+                } catch (Exception exception) {
+                    exception.printStackTrace();
+                }
+                messageArea.setText((String) input.getObject(1));
+                updateTable();
             }
         });
 
@@ -192,12 +205,23 @@ public class DataBasePanel extends GeneralPanel{
         removeGreaterButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                int column = 1;
+                int column = 2;
                 int row = table.getSelectedRow();
                 String value = table.getModel().getValueAt(row, column).toString();
-                long id = Long.parseLong(value);
+                double id = Double.parseDouble(value);
                 System.out.println(id);
-                //todo sending
+
+                client.output.addObject(client.user);
+                client.output.addObject(Commands.REMOVE_GREATER);
+                client.output.addObject(String.valueOf(id));
+
+                try {
+                    input = client.sendMessage();
+                } catch (Exception exception) {
+                    exception.printStackTrace();
+                }
+                messageArea.setText((String) input.getObject(1));
+                updateTable();
             }
         });
 
@@ -205,12 +229,23 @@ public class DataBasePanel extends GeneralPanel{
         removeLowerButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                int column = 1;
+                int column = 2;
                 int row = table.getSelectedRow();
                 String value = table.getModel().getValueAt(row, column).toString();
-                long id = Long.parseLong(value);
+                double id = Double.parseDouble(value);
                 System.out.println(id);
-                //todo sending
+
+                client.output.addObject(client.user);
+                client.output.addObject(Commands.REMOVE_LOWER);
+                client.output.addObject(String.valueOf(id));
+
+                try {
+                    input = client.sendMessage();
+                } catch (Exception exception) {
+                    exception.printStackTrace();
+                }
+                messageArea.setText((String) input.getObject(1));
+                updateTable();
             }
         });
 
@@ -223,6 +258,7 @@ public class DataBasePanel extends GeneralPanel{
                 String value = table.getModel().getValueAt(row, column).toString();
                 long id = Long.parseLong(value);
                 //todo sending and checking if yours
+
                 changePanelInFrame("updateworker");
             }
         });
@@ -231,7 +267,16 @@ public class DataBasePanel extends GeneralPanel{
         clearButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                //todo clearing
+                client.output.addObject(client.user);
+                client.output.addObject(Commands.CLEAR);
+
+                try {
+                    input = client.sendMessage();
+                } catch (Exception exception) {
+                    exception.printStackTrace();
+                }
+                messageArea.setText((String) input.getObject(1));
+                updateTable();
             }
         });
 
