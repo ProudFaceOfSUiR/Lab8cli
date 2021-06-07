@@ -1,6 +1,7 @@
 package com.company.graphics.frames;
 
 
+import com.company.classes.Worker;
 import com.company.database.DataBase;
 import com.company.enums.Commands;
 import com.company.graphics.panels.*;
@@ -16,6 +17,7 @@ public class MainFrame extends GeneralFrame {
 
     DataBase dataBase;
     Client client;
+    Worker workerToUpdate;
 
     LoginPanel loginPanel;
     DataBasePanel dataBasePanel;
@@ -23,37 +25,49 @@ public class MainFrame extends GeneralFrame {
     UpdateWorkerPanel updateWorkerPanel;
     VisualisationPanel visualisationPanel;
 
+    public void setWorkerToUpdate(Worker w){
+        this.workerToUpdate = w;
+    }
+
+    public Worker getWorkerToUpdate() {
+        return workerToUpdate;
+    }
+
+    public void setOperationOnClose(Object p){
+        this.setDefaultCloseOperation((Integer) p);
+    }
+
     public MainFrame(DataBase dataBase, Client client) {
         super(new CardLayout(), new Container());
 
         this.dataBase = dataBase;
         this.client = client;
 
-        WindowListener exitListener = new WindowAdapter() {
+        this.addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent evt) {
+                int resp = JOptionPane.showConfirmDialog(c, "Are you sure you want to exit?",
+                        "Exit?", JOptionPane.YES_NO_OPTION);
 
-            @Override
-            public void windowClosing(WindowEvent e) {
-                int confirm = JOptionPane.showOptionDialog(
-                        null, "Are You Sure to Close Devil's Database?",
-                        "Exit Confirmation", JOptionPane.YES_NO_OPTION,
-                        JOptionPane.QUESTION_MESSAGE, null, null, null);
-                if (confirm == 0) {
-                    client.output.addObject(client.user);
-                    client.output.addObject(Commands.EXIT);
-                    client.output.addObject(null);
-                    try {
-                        client.sendMessage();
-                    } catch (Exception ee) {
-                        System.out.println(ee.getMessage());
+                if (resp == JOptionPane.YES_OPTION) {
+                    setOperationOnClose(JFrame.EXIT_ON_CLOSE);
+                    if (client.user.getLogin() != null){
+                        client.output.addObject(client.user);
+                        client.output.addObject(Commands.EXIT);
+                        client.output.addObject(null);
+                        try {
+                            client.sendMessage();
+                        } catch (Exception ee) {
+                            System.out.println(ee.getMessage());
+                        }
                     }
                     System.exit(1);
+                } else {
+                    setOperationOnClose(JFrame.DO_NOTHING_ON_CLOSE);
                 }
             }
-        };
-        this.addWindowListener(exitListener);
+        });
 
         this.setWindowSize(800, 600);
-        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setScreenSize();
         this.setBounds(screenWidth/2 - 350, screenHeigth/2-300, width,heigth);
         this.setTitle("Devil's Database");
@@ -78,8 +92,8 @@ public class MainFrame extends GeneralFrame {
         dataBasePanel.initializeDatabaseFrame();
 
         addWorkerPanel = new AddWorkerPanel(this,c,client);
-        updateWorkerPanel = new UpdateWorkerPanel(this,c);
-        visualisationPanel = new VisualisationPanel(this, c);
+        updateWorkerPanel = new UpdateWorkerPanel(this,c,client);
+        visualisationPanel = new VisualisationPanel(this, c,client);
 
         c.add(loginPanel, "login");
         cards.next(c);

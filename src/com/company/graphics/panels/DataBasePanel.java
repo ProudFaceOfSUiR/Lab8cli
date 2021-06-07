@@ -10,6 +10,7 @@ import com.company.enums.Position;
 import com.company.exceptions.InvalidDataException;
 import com.company.exceptions.NotConnectedException;
 import com.company.graphics.frames.GeneralFrame;
+import com.company.graphics.frames.MainFrame;
 import com.company.network.Client;
 import com.company.network.Messages;
 
@@ -20,6 +21,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.io.IOException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -122,7 +124,7 @@ public class DataBasePanel extends GeneralPanel{
         informationArea.setEditable(false);
 
 
-        String message = "message";
+        String message = "";
         messageArea = new JTextArea(message);
         messageArea.setMinimumSize(new Dimension(250, 50));
         messageArea.setPreferredSize(new Dimension(250, 50));
@@ -254,9 +256,26 @@ public class DataBasePanel extends GeneralPanel{
                 int row = table.getSelectedRow();
                 String value = table.getModel().getValueAt(row, column).toString();
                 long id = Long.parseLong(value);
-                //todo sending and checking if yours
 
-                changePanelInFrame("updateworker");
+                client.output.addObject(client.user);
+                client.output.addObject(Commands.UPDATE);
+                client.output.addObject(id);
+
+                try {
+                    input = client.sendMessage();
+                } catch (Exception exception) {
+                    exception.printStackTrace();
+                }
+
+                //aborting if response is string (== error)
+                if (input.getObject(1).getClass().equals(String.class)){
+                    messageArea.setText((String) input.getObject(1));
+                    return;
+                } else {
+                    MainFrame generalFrame = (MainFrame) parentFrame;
+                    generalFrame.setWorkerToUpdate((Worker) input.getObject(1));
+                    changePanelInFrame("updateworker");
+                }
             }
         });
 

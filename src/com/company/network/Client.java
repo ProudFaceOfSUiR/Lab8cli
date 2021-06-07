@@ -101,6 +101,7 @@ public class Client {
                 case INFO:
                 case SHOW:
                 case GROUP_COUNTING_BY_POSITION:
+                case GET_DATABASE:
                     this.output.addObject(c);
                     break;
                 case CLEAR:

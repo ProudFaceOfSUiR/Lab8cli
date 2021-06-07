@@ -4,9 +4,13 @@ import com.company.Login.User;
 import com.company.classes.Coordinates;
 import com.company.classes.Person;
 import com.company.classes.Worker;
+import com.company.enums.Commands;
 import com.company.enums.Position;
 import com.company.exceptions.InvalidDataException;
 import com.company.graphics.frames.GeneralFrame;
+import com.company.graphics.frames.MainFrame;
+import com.company.network.Client;
+import com.company.network.Messages;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -16,9 +20,14 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class UpdateWorkerPanel extends GeneralPanel{
+
+    Client client;
 
     String name = "";
     long id;
@@ -29,23 +38,8 @@ public class UpdateWorkerPanel extends GeneralPanel{
     ZonedDateTime startDay = null;
     ZonedDateTime endDay = null;
 
-    public UpdateWorkerPanel(GeneralFrame parentFrame, Container c) {
-        super(parentFrame, c);
-
-        Worker w = null;
-        try {
-            w = new Worker(123,
-                    "Fcuker",
-                    12,
-                    Position.MANAGER,
-                    new Person(23L,12),
-                    new Coordinates(1,2),
-                    startDay,
-                    endDay,new User()
-            );
-        } catch (InvalidDataException e) {
-            System.out.println(e.getMessage());
-        }
+    public void onShow(MainFrame parentFrame){
+        Worker w = parentFrame.getWorkerToUpdate();
 
         this.name = w.getName();
         this.id = w.getId();
@@ -60,17 +54,26 @@ public class UpdateWorkerPanel extends GeneralPanel{
         cards = new CardLayout(0, 0);
         this.setLayout(cards);
         this.add(initializeAddWorkerFrame());
+        this.revalidate();
+        this.setVisible(true);
+    }
+
+    public UpdateWorkerPanel(MainFrame parentFrame, Container c, Client client) {
+        super(parentFrame, c);
+
+        this.client = client;
 
         this.addComponentListener ( new ComponentAdapter()
         {
             public void componentShown ( ComponentEvent e )
             {
-                System.out.println ( "Component shown" );
+                System.out.println ( "Update shown" );
+                onShow(parentFrame);
             }
 
             public void componentHidden ( ComponentEvent e )
             {
-                System.out.println ( "Component hidden" );
+                System.out.println ( "Update hidden" );
             }
         } );
     }
@@ -104,7 +107,7 @@ public class UpdateWorkerPanel extends GeneralPanel{
         JLabel dateHintLabel = new JLabel("(yyyy-mm-dd)");
         JLabel dateHintLabel1 = new JLabel("(yyyy-mm-dd)");
 
-        JTextField nameField = new JTextField();
+        JTextField nameField = new JTextField(this.name);
         nameField.getDocument().addDocumentListener(new DocumentListener() {
             public void changeColor(){
                 nameLabel.setForeground(Color.BLACK);
@@ -126,7 +129,7 @@ public class UpdateWorkerPanel extends GeneralPanel{
             }
         });
 
-        JTextField salaryField = new JTextField();
+        JTextField salaryField = new JTextField(String.valueOf(this.salary));
         salaryField.getDocument().addDocumentListener(new DocumentListener() {
             public void changeColor(){
                 salaryLabel.setForeground(Color.BLACK);
@@ -149,8 +152,9 @@ public class UpdateWorkerPanel extends GeneralPanel{
         });
 
         JComboBox positionJComboBox = new JComboBox<>(Position.getPositions());
+        positionJComboBox.setSelectedItem(this.position);
 
-        JTextField personField = new JTextField();
+        JTextField personField = new JTextField(this.person.getWeight() + "," + this.person.getHeight());
         personField.getDocument().addDocumentListener(new DocumentListener() {
             public void changeColor(){
                 personLabel.setForeground(Color.BLACK);
@@ -216,7 +220,7 @@ public class UpdateWorkerPanel extends GeneralPanel{
         constraints.gridy = 5;
         jPanel.add(coordinatesLabel, constraints);
 
-        JTextField coordinatesField = new JTextField();
+        JTextField coordinatesField = new JTextField(this.coordinates.getX() + "," + this.coordinates.getY());
         coordinatesField.getDocument().addDocumentListener(new DocumentListener() {
             public void changeColor(){
                 coordinatesLabel.setForeground(Color.BLACK);
@@ -247,7 +251,7 @@ public class UpdateWorkerPanel extends GeneralPanel{
         backButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                previousPanelInFrame();
+                changePanelInFrame("database");
             }
         });
 
@@ -263,7 +267,7 @@ public class UpdateWorkerPanel extends GeneralPanel{
         JDatePickerImpl endDatePicker = new JDatePickerImpl(datePanel,formatter);
          */
 
-        JTextField startDateField = new JTextField();
+        JTextField startDateField = new JTextField(this.startDay.toString());
         startDateField.getDocument().addDocumentListener(new DocumentListener() {
             public void changeColor(){
                 startDateLabel.setForeground(Color.BLACK);
@@ -295,7 +299,7 @@ public class UpdateWorkerPanel extends GeneralPanel{
         constraints.gridx = 2;
         jPanel.add(dateHintLabel, constraints);
 
-        JTextField endDateField = new JTextField();
+        JTextField endDateField = new JTextField(this.endDay.toString());
         endDateField.getDocument().addDocumentListener(new DocumentListener() {
             public void changeColor(){
                 endDateLabel.setForeground(Color.BLACK);
@@ -389,6 +393,45 @@ public class UpdateWorkerPanel extends GeneralPanel{
                 if (hasError){
                     messageLabel.setText(message.toString());
                 } else {
+
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                    LocalDate sdate = LocalDate.parse(startDate, formatter);
+                    LocalDate edate = LocalDate.parse(endDate, formatter);
+                    Worker w = null;
+                    Position position = Position.findEnum((String) positionJComboBox.getSelectedItem());
+                    try {
+                        w = new Worker(0,
+                                name,
+                                Double.parseDouble(salary),
+                                position,
+                                new Person(
+                                        Long.parseLong(personality.split(",")[0]),
+                                        Integer.parseInt(personality.split(",")[1])
+                                ),
+                                new Coordinates(
+                                        Long.parseLong(coordinatesString.split(",")[0]),
+                                        Integer.parseInt(coordinatesString.split(",")[1]
+                                        )),
+                                sdate.atStartOfDay(ZoneId.systemDefault()),
+                                sdate.atStartOfDay(ZoneId.systemDefault()),
+                                client.user
+                        );
+                    } catch (InvalidDataException invalidDataException) {
+                        invalidDataException.printStackTrace();
+                    }
+
+                    client.output.addObject(w);
+                    Messages input = new Messages();
+                    //System.out.println("Message recieved");
+                    try {
+                        input = client.sendMessage();
+                    } catch (Exception ee) {
+                        ee.printStackTrace();
+                    }
+                    System.out.println(input.getObject(1));
+
+                    messageLabel.setText((String) input.getObject(1));
+
                     messageLabel.setText("Updated");
                     nameField.setText("");
                     salaryField.setText("");
