@@ -461,7 +461,7 @@ public class UpdateWorkerPanel extends GeneralPanel{
                     try {
                         input = client.sendMessage();
                     } catch (Exception ee) {
-                        ee.printStackTrace();
+                        changePanelInFrame("loading");
                     }
                     System.out.println(input.getObject(1));
 

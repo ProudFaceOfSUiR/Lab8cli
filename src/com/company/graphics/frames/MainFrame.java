@@ -90,6 +90,16 @@ public class MainFrame extends GeneralFrame {
         loadingPanel.add(new JLabel("connecting... ", loading, JLabel.CENTER),BorderLayout.CENTER);
         c.add(loadingPanel, "loading");
         this.setVisible(true);
+
+        /*
+        //connecting
+        boolean isConnected = client.connectToServer();
+        while (!isConnected){
+            isConnected = client.connectToServer();
+        }
+        run();
+
+         */
     }
 
     public void run(){

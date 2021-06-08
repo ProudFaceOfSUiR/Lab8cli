@@ -362,7 +362,7 @@ public class AddWorkerPanel extends GeneralPanel{
 
                 String name = nameField.getText();
                 if (name.isEmpty() || name.matches("\\s*")){
-                    message.append("Name cannot be empty").append("; ");
+                    message.append( language.getInvalidName() ).append("; ");
                     nameField.setText("");
                     nameLabel.setForeground(Color.RED);
                     hasError = true;
@@ -370,7 +370,7 @@ public class AddWorkerPanel extends GeneralPanel{
 
                 String salary = salaryField.getText();
                 if (!salary.matches("\\s*\\d+\\.*\\d*\\s*")){
-                    message.append("Invalid salary").append("; ");
+                    message.append(language.getInvalidSalary()).append("; ");
                     salaryField.setText("");
                     salaryLabel.setForeground(Color.RED);
                     hasError = true;
@@ -378,7 +378,7 @@ public class AddWorkerPanel extends GeneralPanel{
 
                 String personality = personField.getText();
                 if (!personality.matches("\\s*\\d+,\\d+\\s*")){
-                    message.append("Invalid personality").append("; ");
+                    message.append(language.getInvalidPersonality()).append("; ");
                     personField.setText("");
                     personLabel.setForeground(Color.RED);
                     hasError = true;
@@ -386,7 +386,7 @@ public class AddWorkerPanel extends GeneralPanel{
 
                 String coordinates = coordinatesField.getText();
                 if (!personality.matches("\\s*\\d+,\\d+\\s*")){
-                    message.append("Invalid coordinates").append("; ");
+                    message.append(language.getInvalidCoordinates()).append("; ");
                     coordinatesField.setText("");
                     coordinatesLabel.setForeground(Color.RED);
                     hasError = true;
@@ -394,7 +394,7 @@ public class AddWorkerPanel extends GeneralPanel{
 
                 String startDate = startDateField.getText();
                 if (!startDate.matches("\\s*(?!0000)(\\d{4})-(0[1-9]|1[0-2])-[0-3]\\d\\s*")){
-                    message.append("Invalid start date").append("; ");
+                    message.append(language.getInvalidStart()).append("; ");
                     startDateField.setText("");
                     startDateLabel.setForeground(Color.RED);
                     hasError = true;
@@ -402,7 +402,7 @@ public class AddWorkerPanel extends GeneralPanel{
 
                 String endDate = endDateField.getText();
                 if (!endDate.matches("\\s*(?!0000)(\\d{4})-(0[1-9]|1[0-2])-[0-3]\\d\\s*")){
-                    message.append("Invalid end date").append("; ");
+                    message.append(language.getInvalidEnd()).append("; ");
                     endDateField.setText("");
                     endDateLabel.setForeground(Color.RED);
                     hasError = true;
@@ -451,7 +451,7 @@ public class AddWorkerPanel extends GeneralPanel{
                     try {
                         input = client.sendMessage();
                     } catch (Exception ee) {
-                        ee.printStackTrace();
+                        changePanelInFrame("loading");
                     }
                     System.out.println(input.getObject(1));
 

@@ -6,6 +6,14 @@ public class Language {
     Languages currentLang;
     int language_code = 0;
 
+    //messages
+    String[] invalidName = {"Invalid name", "Некорректное имя", "Некорректное имя", "Netinkamas vardas"};
+    String[] invalidSalary = {"Invalid salary", "Некорректное зп", "Некорректное зп", "Netinkamas atlyginimas"};
+    String[] invalidPersonality = {"Invalid personality", "Некорректное личность", "Некорректное личность", "Netinkamas asmenybė"};
+    String[] invalidCoordinates = {"Invalid coordinates", "Некорректное координаты", "Некорректное координаты", "Netinkamas koordinatės"};
+    String[] invalidStart = {"Invalid start date", "Неверная дата начала", "Неверная дата начала", "Netinkamas pradžios data"};
+    String[] invalidEnd = {"Invalid end date", "Неверная дата конца", "Неверная дата конца", "Netinkamas pabaigos data"};
+
     //login panel
     String[] loginLabel = {"Enter login: ", "Введите логин: ", "Введите логин: ", "Iveskite prisijungimo vardą: "};
     String[] passLabel = {"Enter password: ", "Введите пароль: ", "Введите пароль: ", "Ivesti slaptažodį: "};
@@ -147,5 +155,29 @@ public class Language {
 
     public String getBackButton() {
         return backButton[language_code];
+    }
+
+    public String getInvalidName() {
+        return invalidName[language_code];
+    }
+
+    public String getInvalidSalary() {
+        return invalidSalary[language_code];
+    }
+
+    public String getInvalidPersonality() {
+        return invalidPersonality[language_code];
+    }
+
+    public String getInvalidCoordinates() {
+        return invalidCoordinates[language_code];
+    }
+
+    public String getInvalidStart() {
+        return invalidStart[language_code];
+    }
+
+    public String getInvalidEnd() {
+        return invalidEnd[language_code];
     }
 }
