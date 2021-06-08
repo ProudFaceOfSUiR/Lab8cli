@@ -119,6 +119,7 @@ public class DataBasePanel extends GeneralPanel{
     JButton visualisationButton;
     JButton refreshButton;
     JComboBox langJComboBox;
+    JButton countPositionsButton;
 
     JLabel currentUserLabel;
 
@@ -135,7 +136,7 @@ public class DataBasePanel extends GeneralPanel{
         refreshButton.setText(language.getRefreshButton());
         visualisationButton.setText(language.getVisButton());
         currentUserLabel.setText(language.getCurrentUser());
-
+        countPositionsButton.setText(language.getCountPositionsButton());
 
         columns = new String[]{language.getName(), language.getId(), language.getSalary(), language.getPosition(), language.getPersonality(), language.getCoordinates(), language.getStartDate(), language.getEndDate(), language.getUser()};
         tableModel.setColumnIdentifiers(columns);
@@ -352,6 +353,23 @@ public class DataBasePanel extends GeneralPanel{
             }
         });
 
+        JComboBox positionJComboBox = new JComboBox<>(Position.getPositions());
+        countPositionsButton = new JButton(language.getCountPositionsButton());
+        countPositionsButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String toCount = (String) positionJComboBox.getSelectedItem();
+
+                int counter = 0;
+                for (int i = 0; i < table.getRowCount(); i++) {
+                    if (table.getModel().getValueAt(i, 3).equals(toCount)){
+                        counter++;
+                    }
+                }
+                messageArea.setText(String.valueOf(counter));
+            }
+        });
+
         FlowLayout footer = new FlowLayout();
         JPanel footerPanel = new JPanel(footer);
 
@@ -380,7 +398,14 @@ public class DataBasePanel extends GeneralPanel{
 
         footerPanel2.add(langJComboBox);
 
+        FlowLayout footer3 = new FlowLayout();
+        JPanel footerPanel3 = new JPanel(footer3);
+
+        footerPanel3.add(positionJComboBox);
+        footerPanel3.add(countPositionsButton);
+
         databaseWindow.add(footerPanel);
+        databaseWindow.add(footerPanel3);
         databaseWindow.add(footerPanel2);
 
         databaseWindow.revalidate();

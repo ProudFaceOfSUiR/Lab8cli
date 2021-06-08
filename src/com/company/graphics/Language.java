@@ -44,6 +44,7 @@ public class Language {
     String[] visButton = {"Visualisation", "Визуализация","Визуализация", "Vizualizacija"};
     String[] refreshButton = {"Refresh", "Обновить","Обновить","Atnaujinti"};
     String[] currentUser = {"Current user: ", "Текущий пользователь", "Текущий пользователь", "Dabartinis vartotojas"};
+    String[] countPositionsButton = {"Count position", "Посчитать должности", "Посчитать должности", "Skaičiuokite įrašus"};
 
     //add worker panel
     String[] nameLabel = {"Name: ", "Имя: ","Имя: ","Vardas"};
@@ -280,5 +281,9 @@ public class Language {
 
     public String getUser() {
         return user[language_code];
+    }
+
+    public String getCountPositionsButton() {
+        return countPositionsButton[language_code];
     }
 }
