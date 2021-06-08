@@ -352,11 +352,12 @@ public class DataBasePanel extends GeneralPanel{
         footerPanel.add(removeGreaterButton);
         footerPanel.add(removeLowerButton);
         footerPanel.add(updateSelectedButton);
-        footerPanel.add(clearButton);
+
 
         FlowLayout footer2 = new FlowLayout();
         JPanel footerPanel2 = new JPanel(footer2);
 
+        footerPanel2.add(clearButton);
         footerPanel2.add(visualisationButton);
         footerPanel2.add(refreshButton);
 

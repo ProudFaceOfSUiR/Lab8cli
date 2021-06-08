@@ -13,6 +13,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -136,14 +138,14 @@ public class LoginPanel extends GeneralPanel{
 
                 //validating login
                 if (login.equals("") || login.matches("\\*")){
-                    messageLabel.setText("Login can't be empty!");
+                    messageLabel.setText(language.getInvalidLogin());
                     passwordField.setText("");
                     return;
                 }
 
                 //check if password is empty
                 if (password.length == 0){
-                    messageLabel.setText("Password can't be empty");
+                    messageLabel.setText(language.getInvalidPassword());
                     return;
                 }
 
@@ -169,7 +171,7 @@ public class LoginPanel extends GeneralPanel{
                 if (messages.getObject(1).equals(true)){
                     nextPanelInFrame();
                 } else {
-                    messageLabel.setText("This user doesn't exist");
+                    messageLabel.setText(language.getNoUser());
                 }
             }
         });
@@ -182,27 +184,41 @@ public class LoginPanel extends GeneralPanel{
         jPanel.add(registerButtonLogin, constraints);
 
         constraints.gridy = 5;
-        JComboBox positionJComboBox = new JComboBox<>(Languages.values());
-        positionJComboBox.setSelectedItem(language);
-        jPanel.add(positionJComboBox, constraints);
-        positionJComboBox.addActionListener(new ActionListener() {
+        JComboBox languagesJComboBox = new JComboBox<>(Languages.values());
+        languagesJComboBox.setSelectedItem(language);
+        jPanel.add(languagesJComboBox, constraints);
+        languagesJComboBox.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                changeLanguage((Languages) positionJComboBox.getSelectedItem());
-                System.out.println("current: " + currentLang.toString());
-                currentLang = (Languages) positionJComboBox.getSelectedItem();
-                System.out.println("New " + currentLang);
+                changeLanguage((Languages) languagesJComboBox.getSelectedItem());
 
                 loginButtonLogin.setLabel(language.getLoginButton());
-                registerButtonLogin.setLabel(language.getRegisterButton());
+                registerButtonLogin.setLabel(language.getRegisterInsteadButton());
                 userNameLabel.setText(language.getLoginLabel());
                 passwordLabel.setText(language.getPassLabel());
+
+                revalidate();
             }
         });
 
         // set border for the panel
         jPanel.setBorder(BorderFactory.createTitledBorder(
                 BorderFactory.createEtchedBorder(), "Login Panel"));
+
+        jPanel.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentShown(ComponentEvent e) {
+                changeLanguage(language.getCurrentLang());
+                languagesJComboBox.setSelectedItem(language.getCurrentLang());
+
+                loginButtonLogin.setLabel(language.getLoginInsteadButton());
+                registerButtonLogin.setLabel(language.getRegisterButton());
+                userNameLabel.setText(language.getLoginLabel());
+                passwordLabel.setText(language.getPassLabel());
+
+                revalidate();
+            }
+        });
 
         //showing everything
         jPanel.revalidate();
@@ -274,7 +290,7 @@ public class LoginPanel extends GeneralPanel{
 
                 //validating login
                 if (login.equals("") || login.matches("\\*")){
-                    messageLabel.setText("Login can't be empty!");
+                    messageLabel.setText(language.getInvalidLogin());
                     passwordField.setText("");
                     repeatPasswordField.setText("");
                     return;
@@ -282,13 +298,13 @@ public class LoginPanel extends GeneralPanel{
 
                 //check if password is empty
                 if (password.length == 0 && repreatPassword.length == 0){
-                    messageLabel.setText("Password can't be empty");
+                    messageLabel.setText(language.getInvalidPassword());
                     return;
                 }
 
                 //check if passwords' lenght are different == passwords are diff
                 if (password.length != repreatPassword.length){
-                    messageLabel.setText("Passwords don't match!");
+                    messageLabel.setText(language.getPassNotMatch());
                     passwordField.setText("");
                     repeatPasswordField.setText("");
                     return;
@@ -297,7 +313,7 @@ public class LoginPanel extends GeneralPanel{
                 //check pass match
                 for (int i = 0; i < password.length; i++) {
                     if (password[i] != repreatPassword[i]) {
-                        messageLabel.setText("Passwords don't match!");
+                        messageLabel.setText(language.getPassNotMatch());
                         passwordField.setText("");
                         repeatPasswordField.setText("");
                         return;
@@ -332,33 +348,50 @@ public class LoginPanel extends GeneralPanel{
         jPanel.add(registerButton, constraints);
 
         constraints.gridy = 5;
-        Button loginButton = new Button("Log In instead");
+        Button loginButton = new Button(language.getLoginInsteadButton());
         loginButton.addActionListener(new ChangeCard());
         jPanel.add(loginButton, constraints);
 
 
         constraints.gridy = 6;
-        JComboBox langJComboBox = new JComboBox<>(Languages.values());
-        langJComboBox.setSelectedItem(language);
-        jPanel.add(langJComboBox, constraints);
-        langJComboBox.addActionListener(new ActionListener() {
+        JComboBox langJComboBoxRegister = new JComboBox<>(Languages.values());
+        langJComboBoxRegister.setSelectedItem(language);
+        jPanel.add(langJComboBoxRegister, constraints);
+        langJComboBoxRegister.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.out.println(langJComboBox.getSelectedItem());
-                changeLanguage((Languages) langJComboBox.getSelectedItem());
-                currentLang = (Languages) langJComboBox.getSelectedItem();
 
-                loginButtonLogin.setLabel(language.getLoginButton());
+                changeLanguage((Languages) langJComboBoxRegister.getSelectedItem());
+
+                loginButton.setLabel(language.getLoginInsteadButton());
                 registerButton.setLabel(language.getRegisterButton());
                 userNameLabel.setText(language.getLoginLabel());
                 passwordLabel.setText(language.getPassLabel());
                 repeatPasswordLabel.setText(language.getRepeatPassLabel());
+
+                revalidate();
             }
         });
 
         // set border for the panel
         jPanel.setBorder(BorderFactory.createTitledBorder(
                 BorderFactory.createEtchedBorder(), "Register Panel"));
+
+        jPanel.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentShown(ComponentEvent e) {
+                changeLanguage(language.getCurrentLang());
+                langJComboBoxRegister.setSelectedItem(language.getCurrentLang());
+
+                loginButtonLogin.setLabel(language.getLoginInsteadButton());
+                registerButton.setLabel(language.getRegisterButton());
+                userNameLabel.setText(language.getLoginLabel());
+                passwordLabel.setText(language.getPassLabel());
+                repeatPasswordLabel.setText(language.getRepeatPassLabel());
+
+                revalidate();
+            }
+        });
 
         //showing everything
         jPanel.revalidate();

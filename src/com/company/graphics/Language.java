@@ -6,6 +6,11 @@ public class Language {
     Languages currentLang;
     int language_code = 0;
 
+    //exit window
+    String[] confirmExit = {"Are you sure you want to leave the database?","Вы уверены, что хотите покинуть БД?","Вы уверены, что хотите покинуть БД?", "Ar tikrai norite išeiti iš duomenų bazės?"};
+    String[] yes = {"Yes", "Да", "Да","Taip"};
+    String[] no = {"No", "Нет", "Нет", "Ne"};
+
     //messages
     String[] invalidName = {"Invalid name", "Некорректное имя", "Некорректное имя", "Netinkamas vardas"};
     String[] invalidSalary = {"Invalid salary", "Некорректное зп", "Некорректное зп", "Netinkamas atlyginimas"};
@@ -14,12 +19,20 @@ public class Language {
     String[] invalidStart = {"Invalid start date", "Неверная дата начала", "Неверная дата начала", "Netinkamas pradžios data"};
     String[] invalidEnd = {"Invalid end date", "Неверная дата конца", "Неверная дата конца", "Netinkamas pabaigos data"};
 
+    String[] invalidLogin = {"Login can't be empty", "Логин не должен быть пустым", "Логин не должен быть пустым", "Prisijungimas negali būti tuščias"};
+    String[] invalidPassword =  {"Password can't be empty", "Пароль не должен быть пустым", "Пароль не должен быть пустым", "Slaptažodis negali būti tuščias"};
+    String[] passNotMatch = {"Passwords don't match", "Пароли не совпадают", "Пароли не совпадают", "Slaptažodžiai nesutampa"};
+    String[] noUser = {"This user doen't exist", "Такого пользователя не существует", "Такого пользователя не существует", "Šio vartotojo nėra"};
+
     //login panel
     String[] loginLabel = {"Enter login: ", "Введите логин: ", "Введите логин: ", "Iveskite prisijungimo vardą: "};
     String[] passLabel = {"Enter password: ", "Введите пароль: ", "Введите пароль: ", "Ivesti slaptažodį: "};
     String[] repeatPassLabel = {"Repeat password: ", "Повторите пароль", "Повторите пароль","Pakartokite slaptažodį"};
     String[] loginButton = {"Log in", "Войти", "Войти", "Prisijungti"};
-    String[] registerButton = {"Register instead", "Зарегистрироваться", "Зарегистрироваться", "Registruokis"};
+    String[] registerButton = {"Register", "Зарегистрироваться", "Зарегистрироваться", "Registruokis"};
+
+    String[] registerInsteadButton = {"Register instead", "Зарегистрироваться", "Зарегистрироваться", "Registruokis"};
+    String[] loginInsteadButton = {"Log in instead", "Войти", "Войти", "Prisijungti"};
 
     //database panel
     String[] addButton = {"Add worker", "Добавить работника", "Добавить работника", "Pridėti darbuotoją"};
@@ -179,5 +192,29 @@ public class Language {
 
     public String getInvalidEnd() {
         return invalidEnd[language_code];
+    }
+
+    public String getRegisterInsteadButton() {
+        return registerInsteadButton[language_code];
+    }
+
+    public String getLoginInsteadButton() {
+        return loginInsteadButton[language_code];
+    }
+
+    public String getInvalidLogin() {
+        return invalidLogin[language_code];
+    }
+
+    public String getInvalidPassword() {
+        return invalidPassword[language_code];
+    }
+
+    public String getPassNotMatch() {
+        return passNotMatch[language_code];
+    }
+
+    public String getNoUser() {
+        return noUser[language_code];
     }
 }

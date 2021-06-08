@@ -27,6 +27,7 @@ public class Main {
         MainFrame mainFrame = new MainFrame(dataBase, client, locale);
         mainFrame.loading();
 
+        /*
         //connecting and merging databases
         boolean isConnected = client.connectToServer();
         while (!isConnected){
@@ -53,7 +54,7 @@ public class Main {
                 mainFrame.run();
             }
 
-            /*
+
             boolean hasUser = false;
             Messages messages;
             while (true){
@@ -81,7 +82,7 @@ public class Main {
                 }
             }
 
-             */
-        }
+
+        }*/
     }
 }

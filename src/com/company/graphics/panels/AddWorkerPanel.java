@@ -452,6 +452,7 @@ public class AddWorkerPanel extends GeneralPanel{
                         input = client.sendMessage();
                     } catch (Exception ee) {
                         changePanelInFrame("loading");
+                        return;
                     }
                     System.out.println(input.getObject(1));
 

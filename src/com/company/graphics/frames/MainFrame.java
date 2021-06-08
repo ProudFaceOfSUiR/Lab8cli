@@ -11,9 +11,7 @@ import com.company.network.Client;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
+import java.awt.event.*;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -81,25 +79,37 @@ public class MainFrame extends GeneralFrame {
         c = this.getContentPane();
         cards = new CardLayout(0, 0);
         c.setLayout(cards);
+
+        loading = new ImageIcon("ajax-loader.gif");
+        BorderLayout borderLayout = new BorderLayout();
+        loadingPanel = new JPanel(borderLayout);
+        loadingPanel.add(new JLabel("connecting... ", loading, JLabel.CENTER),BorderLayout.CENTER);
+        loadingPanel.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentShown(ComponentEvent e) {
+                loading();
+            }
+
+            @Override
+            public void componentHidden(ComponentEvent e) {
+
+            }
+        });
+        c.add(loadingPanel, "loading");
     }
+    JPanel loadingPanel;
+    ImageIcon loading;
 
     public void loading(){
-        ImageIcon loading = new ImageIcon("ajax-loader.gif");
-        BorderLayout borderLayout = new BorderLayout();
-        JPanel loadingPanel = new JPanel(borderLayout);
-        loadingPanel.add(new JLabel("connecting... ", loading, JLabel.CENTER),BorderLayout.CENTER);
-        c.add(loadingPanel, "loading");
+        this.revalidate();
         this.setVisible(true);
 
-        /*
         //connecting
         boolean isConnected = client.connectToServer();
         while (!isConnected){
             isConnected = client.connectToServer();
         }
         run();
-
-         */
     }
 
     public void run(){
