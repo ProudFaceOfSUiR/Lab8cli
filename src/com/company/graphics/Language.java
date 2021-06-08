@@ -57,6 +57,7 @@ public class Language {
     String[] addIfMaxLabel = {"Add if salary is max", "Добавить, если зп максимальная", "Добавить, если зп максимальная", "Pridėkite, jei atlyginimas yra maksimalus"};
     String[] submitButton = {"Submit", "Отправить", "Отправить", "Pateikti"};
     String[] backButton = {"Back", "Назад", "Назад", "Atgal"};
+    String[] weightHeight = {"(Weight, Height)", "(Вес, рост)", "(Вес, рост)", "Svoris, Ūgis"};
 
     //table
     String[] name = {"Name", "Имя", "Имя", "Vardas"};
@@ -285,5 +286,9 @@ public class Language {
 
     public String getCountPositionsButton() {
         return countPositionsButton[language_code];
+    }
+
+    public String getWeightHeight() {
+        return weightHeight[language_code];
     }
 }

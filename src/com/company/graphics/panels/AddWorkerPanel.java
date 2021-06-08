@@ -46,7 +46,6 @@ public class AddWorkerPanel extends GeneralPanel{
             {
                 changeLangue(language.getCurrentLang());
                 System.out.println("Addworker shown");
-                //todo erase everything
             }
 
             public void componentHidden ( ComponentEvent e )
@@ -71,6 +70,8 @@ public class AddWorkerPanel extends GeneralPanel{
         submitButton.setText(language.getSubmitButton());
         backButton.setText(language.getBackButton());
 
+        personalityHintLabel.setText(language.getWeightHeight());
+
         langJComboBox.setSelectedItem(lang);
 
         revalidate();
@@ -88,6 +89,8 @@ public class AddWorkerPanel extends GeneralPanel{
 
     JButton submitButton;
     JButton backButton;
+
+    JLabel personalityHintLabel;
 
     public JPanel initializeAddWorkerFrame(){
         JPanel jPanel = new JPanel(new GridBagLayout());
@@ -114,7 +117,7 @@ public class AddWorkerPanel extends GeneralPanel{
         endDateLabel = new JLabel(language.getEndDateLabel());
 
         JLabel coordinatesHintLabel = new JLabel("(x,y)");
-        JLabel personalityHintLabel = new JLabel("(height,weight)");
+        personalityHintLabel = new JLabel(language.getWeightHeight());
         JLabel dateHintLabel = new JLabel("(yyyy-mm-dd)");
         JLabel dateHintLabel1 = new JLabel("(yyyy-mm-dd)");
 
