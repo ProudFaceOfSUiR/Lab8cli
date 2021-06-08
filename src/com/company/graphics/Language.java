@@ -43,6 +43,7 @@ public class Language {
     String[] clearButton = {"Clear database", "Очистить БД", "Очистить БД", "Išvalyti duomenų bazę"};
     String[] visButton = {"Visualisation", "Визуализация","Визуализация", "Vizualizacija"};
     String[] refreshButton = {"Refresh", "Обновить","Обновить","Atnaujinti"};
+    String[] currentUser = {"Current user: ", "Текущий пользователь", "Текущий пользователь", "Dabartinis vartotojas"};
 
     //add worker panel
     String[] nameLabel = {"Name: ", "Имя: ","Имя: ","Vardas"};
@@ -55,6 +56,17 @@ public class Language {
     String[] addIfMaxLabel = {"Add if salary is max", "Добавить, если зп максимальная", "Добавить, если зп максимальная", "Pridėkite, jei atlyginimas yra maksimalus"};
     String[] submitButton = {"Submit", "Отправить", "Отправить", "Pateikti"};
     String[] backButton = {"Back", "Назад", "Назад", "Atgal"};
+
+    //table
+    String[] name = {"Name", "Имя", "Имя", "Vardas"};
+    String[] id = {"ID", "Айди", "Айди", "ID"};
+    String[] salary = {"Salary", "Зарплата", "Зарплата", "Atlyginimas"};
+    String[] position = {"Position", "Должность", "Должность", "Poziciją"};
+    String[] personality = {"Personality", "Личность", "Личность", "Asmenybė"};
+    String[] coordinates = {"Coordinates", "Координаты", "Координаты", "Koordinatės"};
+    String[] startDate = {"Start date", "Первый день", "Первый день", "Pradžios data"};
+    String[] endDate = {"End date", "Последний день", "Последний день", "Pabaigos data"};
+    String[] user = {"User", "Пользователь", "Пользователь", "Vartotojas"};
 
     public Languages getCurrentLang() {
         return currentLang;
@@ -216,5 +228,57 @@ public class Language {
 
     public String getNoUser() {
         return noUser[language_code];
+    }
+
+    public String getConfirmExit() {
+        return confirmExit[language_code];
+    }
+
+    public String getYes() {
+        return yes[language_code];
+    }
+
+    public String getNo() {
+        return no[language_code];
+    }
+
+    public String getCurrentUser() {
+        return currentUser[language_code];
+    }
+
+    public String getName() {
+        return name[language_code];
+    }
+
+    public String getId() {
+        return id[language_code];
+    }
+
+    public String getSalary() {
+        return salary[language_code];
+    }
+
+    public String getPosition() {
+        return position[language_code];
+    }
+
+    public String getPersonality() {
+        return personality[language_code];
+    }
+
+    public String getCoordinates() {
+        return coordinates[language_code];
+    }
+
+    public String getStartDate() {
+        return startDate[language_code];
+    }
+
+    public String getEndDate() {
+        return endDate[language_code];
+    }
+
+    public String getUser() {
+        return user[language_code];
     }
 }

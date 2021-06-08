@@ -120,6 +120,8 @@ public class DataBasePanel extends GeneralPanel{
     JButton refreshButton;
     JComboBox langJComboBox;
 
+    JLabel currentUserLabel;
+
     public void changeLangue(Languages lang){
         changeLanguage(lang);
         currentLang = lang;
@@ -132,11 +134,20 @@ public class DataBasePanel extends GeneralPanel{
         clearButton.setText(language.getClearButton());
         refreshButton.setText(language.getRefreshButton());
         visualisationButton.setText(language.getVisButton());
+        currentUserLabel.setText(language.getCurrentUser());
+
+
+        columns = new String[]{language.getName(), language.getId(), language.getSalary(), language.getPosition(), language.getPersonality(), language.getCoordinates(), language.getStartDate(), language.getEndDate(), language.getUser()};
+        tableModel.setColumnIdentifiers(columns);
+        System.out.println(columns);
+        table.getTableHeader().resizeAndRepaint();
 
         langJComboBox.setSelectedItem(lang);
 
         revalidate();
     }
+
+    String[] columns = {language.getName(), language.getId(),language.getSalary(), language.getPosition(), language.getPersonality(), language.getCoordinates(),language.getStartDate(),language.getEndDate(),language.getUser()};
 
     public JPanel getDatabaseWindow(){
         JPanel databaseWindow = new JPanel();
@@ -167,7 +178,8 @@ public class DataBasePanel extends GeneralPanel{
 
         JPanel userP = new JPanel();
         BoxLayout userLayout = new BoxLayout(userP,BoxLayout.Y_AXIS);
-        userP.add(new JLabel("Current user:"));
+        currentUserLabel = new JLabel(language.getCurrentUser());
+        userP.add(currentUserLabel);
         currentUser = new JLabel("null");
         userP.add(currentUser);
         userP.setLayout(userLayout);
@@ -177,10 +189,6 @@ public class DataBasePanel extends GeneralPanel{
         headerPanel.add(userP);
 
         databaseWindow.add(headerPanel);
-
-
-        //headers for the table
-        String[] columns = {"Name", "id", "Salary", "Position", "Personality", "Coordinates", "Start Date", "End Date", "User"};
 
         tableModel = new DatabaseTableModel();
         tableModel.setColumnIdentifiers(columns);
