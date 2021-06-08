@@ -5,9 +5,11 @@ import com.company.classes.Person;
 import com.company.classes.Worker;
 import com.company.database.Terminal;
 import com.company.enums.Commands;
+import com.company.enums.Languages;
 import com.company.enums.Position;
 import com.company.exceptions.InvalidDataException;
 import com.company.exceptions.NotConnectedException;
+import com.company.graphics.Language;
 import com.company.graphics.frames.GeneralFrame;
 import com.company.network.Client;
 import com.company.network.Messages;
@@ -24,13 +26,14 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 public class AddWorkerPanel extends GeneralPanel{
 
     Client client;
 
-    public AddWorkerPanel(GeneralFrame parentFrame, Container c, Client client) {
-        super(parentFrame, c);
+    public AddWorkerPanel(GeneralFrame parentFrame, Container c, Client client, Locale locale, Language language, Languages currentLanguage) {
+        super(parentFrame, c, locale, language, currentLanguage);
         container = this;
         cards = new CardLayout(0, 0);
         this.setLayout(cards);
@@ -41,6 +44,7 @@ public class AddWorkerPanel extends GeneralPanel{
         {
             public void componentShown ( ComponentEvent e )
             {
+                changeLangue(language.getCurrentLang());
                 System.out.println("Addworker shown");
                 //todo erase everything
             }
@@ -51,6 +55,39 @@ public class AddWorkerPanel extends GeneralPanel{
             }
         } );
     }
+
+    public void changeLangue(Languages lang){
+        changeLanguage(lang);
+
+        nameLabel.setText(language.getNameLabel());
+        salaryLabel.setText(language.getSalaryLabel());
+        positionLabel.setText(language.getPositionLabel());
+        personLabel.setText(language.getPersonLabel());
+        coordinatesLabel.setText(language.getCoordLabel());
+        startDateLabel.setText(language.getStartDateLabel());
+        endDateLabel.setText(language.getEndDateLabel());
+        addIfMaxLabel.setText(language.getAddIfMaxLabel());
+
+        submitButton.setText(language.getSubmitButton());
+        backButton.setText(language.getBackButton());
+
+        langJComboBox.setSelectedItem(lang);
+
+        revalidate();
+    }
+
+    JLabel nameLabel;
+    JLabel salaryLabel;
+    JLabel positionLabel;
+    JLabel personLabel;
+    JLabel coordinatesLabel;
+    JLabel startDateLabel;
+    JLabel endDateLabel;
+    JComboBox langJComboBox;
+    JLabel addIfMaxLabel;
+
+    JButton submitButton;
+    JButton backButton;
 
     public JPanel initializeAddWorkerFrame(){
         JPanel jPanel = new JPanel(new GridBagLayout());
@@ -68,13 +105,13 @@ public class AddWorkerPanel extends GeneralPanel{
         messageLabel.setPreferredSize(new Dimension(350, 50));
         messageLabel.setMaximumSize(new Dimension(350, 50));
 
-        JLabel nameLabel = new JLabel("Name: ");
-        JLabel salaryLabel = new JLabel("Salary: ");
-        JLabel positionLabel = new JLabel("Position: ");
-        JLabel personLabel = new JLabel("Personality: ");
-        JLabel coordinatesLabel = new JLabel("Coordinates: ");
-        JLabel startDateLabel = new JLabel("Start date: ");
-        JLabel endDateLabel = new JLabel("End date: ");
+        nameLabel = new JLabel(language.getNameLabel());
+        salaryLabel = new JLabel(language.getSalaryLabel());
+        positionLabel = new JLabel(language.getPositionLabel());
+        personLabel = new JLabel(language.getPersonLabel());
+        coordinatesLabel = new JLabel(language.getCoordLabel());
+        startDateLabel = new JLabel(language.getStartDateLabel());
+        endDateLabel = new JLabel(language.getEndDateLabel());
 
         JLabel coordinatesHintLabel = new JLabel("(x,y)");
         JLabel personalityHintLabel = new JLabel("(height,weight)");
@@ -220,7 +257,7 @@ public class AddWorkerPanel extends GeneralPanel{
         constraints.gridx = 2;
         jPanel.add(coordinatesHintLabel, constraints);
 
-        JButton backButton = new JButton("Back to database");
+        backButton = new JButton(language.getBackButton());
         backButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -306,7 +343,7 @@ public class AddWorkerPanel extends GeneralPanel{
 
         constraints.gridx = 0;
         constraints.gridy = 8;
-        JLabel addIfMaxLabel = new JLabel("Add if salary is maximum");
+        addIfMaxLabel = new JLabel(language.getAddIfMaxLabel());
         jPanel.add(addIfMaxLabel, constraints);
         JCheckBox addIfMaxCheckBox = new JCheckBox();
         constraints.gridx = 1;
@@ -316,7 +353,7 @@ public class AddWorkerPanel extends GeneralPanel{
         constraints.gridy = 9;
         jPanel.add(backButton, constraints);
 
-        JButton submitButton = new JButton("Submit");
+        submitButton = new JButton(language.getSubmitButton());
         submitButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -431,6 +468,17 @@ public class AddWorkerPanel extends GeneralPanel{
 
         constraints.gridx = 1;
         jPanel.add(submitButton, constraints);
+
+        constraints.gridx = 2;
+        langJComboBox = new JComboBox<>(Languages.values());
+        langJComboBox.setSelectedItem(language);
+        langJComboBox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                changeLangue((Languages) langJComboBox.getSelectedItem());
+            }
+        });
+        jPanel.add(langJComboBox, constraints);
 
         // set border for the panel
         jPanel.setBorder(BorderFactory.createTitledBorder(

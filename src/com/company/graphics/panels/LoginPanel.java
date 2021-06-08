@@ -1,6 +1,9 @@
 package com.company.graphics.panels;
 
 import com.company.Login.User;
+import com.company.enums.Languages;
+import com.company.enums.Position;
+import com.company.graphics.Language;
 import com.company.graphics.frames.GeneralFrame;
 import com.company.graphics.frames.MainFrame;
 import com.company.network.Client;
@@ -10,7 +13,12 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 public class LoginPanel extends GeneralPanel{
     //to check
@@ -34,16 +42,18 @@ public class LoginPanel extends GeneralPanel{
         this.password = password;
     }
 
-    public LoginPanel(GeneralFrame parentFrame, Container c, Client client) {
-        super(parentFrame, c);
+    public LoginPanel(GeneralFrame parentFrame, Container c, Client client, Locale locale, Language language, Languages currentLanguage) {
+        super(parentFrame, c,locale, language, currentLanguage);
         
         this.client = client;
     }
 
 
+
     //graphics
 
     public void initializeLoginFrame(){
+
         container = this;
         cards = new CardLayout(0, 0);
         this.setLayout(cards);
@@ -53,15 +63,27 @@ public class LoginPanel extends GeneralPanel{
         this.add(registerWindow);
     }
 
+    Button loginButtonLogin;
+    Button registerButtonLogin;
+    JLabel userNameLabel;
+    JLabel passwordLabel;
+
+    public void changeLanguageInPanel(){
+
+    }
+
     public JPanel getLoginWindow(){
+
+        //changeLanguage(Languages.ru_RU);
+
         JPanel jPanel = new JPanel(new GridBagLayout());
         jPanel.setBounds(screenWidth/2 - 250, screenHeigth/2-250, width,heigth);
 
-        JLabel userNameLabel = new JLabel("Enter username:");
+        userNameLabel = new JLabel(language.getLoginLabel());
         JTextField userNameField = new JTextField(20);
 
         JPasswordField passwordField = new JPasswordField( 20);
-        JLabel passwordLabel = new JLabel("Enter password:");
+        passwordLabel = new JLabel(language.getPassLabel());
 
         GridBagConstraints constraints = new GridBagConstraints();
         constraints.fill = GridBagConstraints.BOTH;
@@ -97,9 +119,16 @@ public class LoginPanel extends GeneralPanel{
         constraints.gridwidth = 2;
         constraints.anchor = GridBagConstraints.CENTER;
 
+        Locale l = new Locale("ru", "RU");
+
+        ResourceBundle r = ResourceBundle.getBundle("text", l);
+
+        String buttonText = r.getString("login.button");
+        //buttonText = new String(buttonText.getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8);
+
         //setting button to send data
-        Button loginButton = new Button("Log in");
-        loginButton.addActionListener(new ActionListener() {
+        loginButtonLogin = new Button(buttonText);
+        loginButtonLogin.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String login = userNameField.getText();
@@ -144,13 +173,32 @@ public class LoginPanel extends GeneralPanel{
                 }
             }
         });
-        jPanel.add(loginButton, constraints);
+        jPanel.add(loginButtonLogin, constraints);
 
 
         constraints.gridy = 4;
-        Button registerButton = new Button("Register instead");
-        registerButton.addActionListener(new ChangeCard());
-        jPanel.add(registerButton, constraints);
+        registerButtonLogin = new Button(language.getRegisterButton());
+        registerButtonLogin.addActionListener(new ChangeCard());
+        jPanel.add(registerButtonLogin, constraints);
+
+        constraints.gridy = 5;
+        JComboBox positionJComboBox = new JComboBox<>(Languages.values());
+        positionJComboBox.setSelectedItem(language);
+        jPanel.add(positionJComboBox, constraints);
+        positionJComboBox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                changeLanguage((Languages) positionJComboBox.getSelectedItem());
+                System.out.println("current: " + currentLang.toString());
+                currentLang = (Languages) positionJComboBox.getSelectedItem();
+                System.out.println("New " + currentLang);
+
+                loginButtonLogin.setLabel(language.getLoginButton());
+                registerButtonLogin.setLabel(language.getRegisterButton());
+                userNameLabel.setText(language.getLoginLabel());
+                passwordLabel.setText(language.getPassLabel());
+            }
+        });
 
         // set border for the panel
         jPanel.setBorder(BorderFactory.createTitledBorder(
@@ -165,15 +213,15 @@ public class LoginPanel extends GeneralPanel{
         JPanel jPanel = new JPanel(new GridBagLayout());
         jPanel.setBounds(screenWidth/2 - 250, screenHeigth/2-250, width, heigth);
 
-        JLabel userNameLabel = new JLabel("Enter username:");
+        JLabel userNameLabel = new JLabel(language.getLoginLabel());
         JTextField userNameField = new JTextField(20);
 
         JPasswordField passwordField = new JPasswordField( 20);
 
-        JLabel passwordLabel = new JLabel("Enter password:");
+        JLabel passwordLabel = new JLabel(language.getPassLabel());
 
         JPasswordField repeatPasswordField = new JPasswordField( 20);
-        JLabel repeatPasswordLabel = new JLabel("Enter password:");
+        JLabel repeatPasswordLabel = new JLabel(language.getRepeatPassLabel());
 
         GridBagConstraints constraints = new GridBagConstraints();
         constraints.fill = GridBagConstraints.BOTH;
@@ -216,7 +264,7 @@ public class LoginPanel extends GeneralPanel{
         constraints.anchor = GridBagConstraints.CENTER;
 
         //setting button to send data
-        Button registerButton = new Button("Register");
+        Button registerButton = new Button(language.getRegisterButton());
         registerButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -287,6 +335,26 @@ public class LoginPanel extends GeneralPanel{
         Button loginButton = new Button("Log In instead");
         loginButton.addActionListener(new ChangeCard());
         jPanel.add(loginButton, constraints);
+
+
+        constraints.gridy = 6;
+        JComboBox langJComboBox = new JComboBox<>(Languages.values());
+        langJComboBox.setSelectedItem(language);
+        jPanel.add(langJComboBox, constraints);
+        langJComboBox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println(langJComboBox.getSelectedItem());
+                changeLanguage((Languages) langJComboBox.getSelectedItem());
+                currentLang = (Languages) langJComboBox.getSelectedItem();
+
+                loginButtonLogin.setLabel(language.getLoginButton());
+                registerButton.setLabel(language.getRegisterButton());
+                userNameLabel.setText(language.getLoginLabel());
+                passwordLabel.setText(language.getPassLabel());
+                repeatPasswordLabel.setText(language.getRepeatPassLabel());
+            }
+        });
 
         // set border for the panel
         jPanel.setBorder(BorderFactory.createTitledBorder(

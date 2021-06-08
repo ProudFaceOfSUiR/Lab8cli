@@ -8,6 +8,8 @@ import com.company.exceptions.NotConnectedException;
 import com.company.graphics.frames.MainFrame;
 import com.company.network.Client;
 import com.company.network.Messages;
+
+import java.util.Locale;
 //import com.sun.javaws.IconUtil;
 
 
@@ -21,7 +23,8 @@ public class Main {
         //initializing clent
         Client client = new Client(dataBase);
 
-        MainFrame mainFrame = new MainFrame(dataBase, client);
+        Locale locale = new Locale("ru", "RU");
+        MainFrame mainFrame = new MainFrame(dataBase, client, locale);
         mainFrame.loading();
 
         //connecting and merging databases

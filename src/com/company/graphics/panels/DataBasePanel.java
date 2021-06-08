@@ -6,9 +6,11 @@ import com.company.classes.Person;
 import com.company.classes.Worker;
 import com.company.database.DataBase;
 import com.company.enums.Commands;
+import com.company.enums.Languages;
 import com.company.enums.Position;
 import com.company.exceptions.InvalidDataException;
 import com.company.exceptions.NotConnectedException;
+import com.company.graphics.Language;
 import com.company.graphics.frames.GeneralFrame;
 import com.company.graphics.frames.MainFrame;
 import com.company.network.Client;
@@ -25,6 +27,7 @@ import java.io.IOException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Locale;
 import java.util.Vector;
 
 public class DataBasePanel extends GeneralPanel{
@@ -60,8 +63,8 @@ public class DataBasePanel extends GeneralPanel{
         }
     }
 
-    public DataBasePanel(GeneralFrame parentFrame, Container c, Client client) {
-        super(parentFrame, c);
+    public DataBasePanel(GeneralFrame parentFrame, Container c, Client client, Locale locale, Language language, Languages currentLanguage) {
+        super(parentFrame, c, locale, language, currentLanguage);
 
         this.client = client;
 
@@ -71,6 +74,7 @@ public class DataBasePanel extends GeneralPanel{
             public void componentShown ( ComponentEvent e )
             {
                 System.out.println("Database shown");
+                changeLangue(language.getCurrentLang());
                 input = null;
                 try {
                     input = (Messages) client.readCommand(Commands.INFO);
@@ -104,6 +108,34 @@ public class DataBasePanel extends GeneralPanel{
             return false;
         }
 
+    }
+
+    JButton addWorkerButton;
+    JButton removeSelectedButton;
+    JButton removeGreaterButton;
+    JButton removeLowerButton;
+    JButton updateSelectedButton;
+    JButton clearButton;
+    JButton visualisationButton;
+    JButton refreshButton;
+    JComboBox langJComboBox;
+
+    public void changeLangue(Languages lang){
+        changeLanguage(lang);
+        currentLang = lang;
+
+        addWorkerButton.setText(language.getAddButton());
+        removeSelectedButton.setText(language.getRemoveButton());
+        removeGreaterButton.setText(language.getRemoveGreaterButton());
+        removeLowerButton.setText(language.getRemoveLowerButton());
+        updateSelectedButton.setText(language.getUpdateButton());
+        clearButton.setText(language.getClearButton());
+        refreshButton.setText(language.getRefreshButton());
+        visualisationButton.setText(language.getVisButton());
+
+        langJComboBox.setSelectedItem(lang);
+
+        revalidate();
     }
 
     public JPanel getDatabaseWindow(){
@@ -169,7 +201,7 @@ public class DataBasePanel extends GeneralPanel{
         //add the table to the frame
         databaseWindow.add(jScrollPane);
 
-        JButton addWorkerButton = new JButton("Add worker");
+        addWorkerButton = new JButton(language.getAddButton());
         addWorkerButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -177,7 +209,7 @@ public class DataBasePanel extends GeneralPanel{
             }
         });
 
-        JButton removeSelectedButton = new JButton("Remove selected");
+        removeSelectedButton = new JButton(language.getRemoveButton());
         removeSelectedButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -200,7 +232,7 @@ public class DataBasePanel extends GeneralPanel{
             }
         });
 
-        JButton removeGreaterButton = new JButton("Remove greater");
+        removeGreaterButton = new JButton(language.getRemoveGreaterButton());
         removeGreaterButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -224,7 +256,7 @@ public class DataBasePanel extends GeneralPanel{
             }
         });
 
-        JButton removeLowerButton = new JButton("Remove lower");
+        removeLowerButton = new JButton(language.getRemoveLowerButton());
         removeLowerButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -248,7 +280,7 @@ public class DataBasePanel extends GeneralPanel{
             }
         });
 
-        JButton updateSelectedButton = new JButton("Update selected");
+        updateSelectedButton = new JButton(language.getUpdateButton());
         updateSelectedButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -279,7 +311,7 @@ public class DataBasePanel extends GeneralPanel{
             }
         });
 
-        JButton clearButton = new JButton("Clear database");
+        clearButton = new JButton(language.getClearButton());
         clearButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -296,7 +328,7 @@ public class DataBasePanel extends GeneralPanel{
             }
         });
 
-        JButton visualisationButton = new JButton("Visualisation");
+        visualisationButton = new JButton(language.getVisButton());
         visualisationButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -304,7 +336,7 @@ public class DataBasePanel extends GeneralPanel{
             }
         });
 
-        JButton refreshButton = new JButton("Refresh");
+        refreshButton = new JButton(language.getRefreshButton());
         refreshButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -327,6 +359,17 @@ public class DataBasePanel extends GeneralPanel{
 
         footerPanel2.add(visualisationButton);
         footerPanel2.add(refreshButton);
+
+        langJComboBox = new JComboBox<>(Languages.values());
+        langJComboBox.setSelectedItem(language);
+        langJComboBox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                changeLangue((Languages) langJComboBox.getSelectedItem());
+            }
+        });
+
+        footerPanel2.add(langJComboBox);
 
         databaseWindow.add(footerPanel);
         databaseWindow.add(footerPanel2);

@@ -5,8 +5,10 @@ import com.company.classes.Coordinates;
 import com.company.classes.Person;
 import com.company.classes.Worker;
 import com.company.enums.Commands;
+import com.company.enums.Languages;
 import com.company.enums.Position;
 import com.company.exceptions.InvalidDataException;
+import com.company.graphics.Language;
 import com.company.graphics.frames.GeneralFrame;
 import com.company.graphics.frames.MainFrame;
 import com.company.network.Client;
@@ -24,6 +26,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 public class UpdateWorkerPanel extends GeneralPanel{
 
@@ -58,8 +61,8 @@ public class UpdateWorkerPanel extends GeneralPanel{
         this.setVisible(true);
     }
 
-    public UpdateWorkerPanel(MainFrame parentFrame, Container c, Client client) {
-        super(parentFrame, c);
+    public UpdateWorkerPanel(MainFrame parentFrame, Container c, Client client, Locale locale, Language language, Languages currentLanguage) {
+        super(parentFrame, c, locale, language, currentLanguage);
 
         this.client = client;
 
@@ -69,6 +72,7 @@ public class UpdateWorkerPanel extends GeneralPanel{
             {
                 System.out.println ( "Update shown" );
                 onShow(parentFrame);
+                changeLangue(language.getCurrentLang());
             }
 
             public void componentHidden ( ComponentEvent e )
@@ -77,6 +81,37 @@ public class UpdateWorkerPanel extends GeneralPanel{
             }
         } );
     }
+
+    public void changeLangue(Languages lang){
+        changeLanguage(lang);
+
+        nameLabel.setText(language.getNameLabel());
+        salaryLabel.setText(language.getSalaryLabel());
+        positionLabel.setText(language.getPositionLabel());
+        personLabel.setText(language.getPersonLabel());
+        coordinatesLabel.setText(language.getCoordLabel());
+        startDateLabel.setText(language.getStartDateLabel());
+        endDateLabel.setText(language.getEndDateLabel());
+
+        submitButton.setText(language.getSubmitButton());
+        backButton.setText(language.getBackButton());
+
+        langJComboBox.setSelectedItem(lang);
+
+        revalidate();
+    }
+
+    JLabel nameLabel;
+    JLabel salaryLabel;
+    JLabel positionLabel;
+    JLabel personLabel;
+    JLabel coordinatesLabel;
+    JLabel startDateLabel;
+    JLabel endDateLabel;
+    JComboBox langJComboBox;
+
+    JButton submitButton;
+    JButton backButton;
 
     public JPanel initializeAddWorkerFrame(){
         JPanel jPanel = new JPanel(new GridBagLayout());
@@ -94,13 +129,13 @@ public class UpdateWorkerPanel extends GeneralPanel{
         messageLabel.setPreferredSize(new Dimension(350, 50));
         messageLabel.setMaximumSize(new Dimension(350, 50));
 
-        JLabel nameLabel = new JLabel("Name: ");
-        JLabel salaryLabel = new JLabel("Salary: ");
-        JLabel positionLabel = new JLabel("Position: ");
-        JLabel personLabel = new JLabel("Personality: ");
-        JLabel coordinatesLabel = new JLabel("Coordinates: ");
-        JLabel startDateLabel = new JLabel("Start date: ");
-        JLabel endDateLabel = new JLabel("End date: ");
+        nameLabel = new JLabel(language.getNameLabel());
+        salaryLabel = new JLabel(language.getSalaryLabel());
+        positionLabel = new JLabel(language.getPositionLabel());
+        personLabel = new JLabel(language.getPersonLabel());
+        coordinatesLabel = new JLabel(language.getCoordLabel());
+        startDateLabel = new JLabel(language.getStartDateLabel());
+        endDateLabel = new JLabel(language.getEndDateLabel());
 
         JLabel coordinatesHintLabel = new JLabel("(x,y)");
         JLabel personalityHintLabel = new JLabel("(height,weight)");
@@ -247,7 +282,7 @@ public class UpdateWorkerPanel extends GeneralPanel{
         constraints.gridx = 2;
         jPanel.add(coordinatesHintLabel, constraints);
 
-        JButton backButton = new JButton("Back");
+        backButton = new JButton(language.getBackButton());
         backButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -267,7 +302,7 @@ public class UpdateWorkerPanel extends GeneralPanel{
         JDatePickerImpl endDatePicker = new JDatePickerImpl(datePanel,formatter);
          */
 
-        JTextField startDateField = new JTextField(this.startDay.toString());
+        JTextField startDateField = new JTextField(this.startDay.toString().substring(0,10));
         startDateField.getDocument().addDocumentListener(new DocumentListener() {
             public void changeColor(){
                 startDateLabel.setForeground(Color.BLACK);
@@ -299,7 +334,7 @@ public class UpdateWorkerPanel extends GeneralPanel{
         constraints.gridx = 2;
         jPanel.add(dateHintLabel, constraints);
 
-        JTextField endDateField = new JTextField(this.endDay.toString());
+        JTextField endDateField = new JTextField(this.endDay.toString().substring(0,10));
         endDateField.getDocument().addDocumentListener(new DocumentListener() {
             public void changeColor(){
                 endDateLabel.setForeground(Color.BLACK);
@@ -335,7 +370,7 @@ public class UpdateWorkerPanel extends GeneralPanel{
         constraints.gridy = 8;
         jPanel.add(backButton, constraints);
 
-        JButton submitButton = new JButton("Submit");
+        submitButton = new JButton(language.getSubmitButton());
         submitButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -377,7 +412,7 @@ public class UpdateWorkerPanel extends GeneralPanel{
                 String startDate = startDateField.getText();
                 if (!startDate.matches("\\s*(?!0000)(\\d{4})-(0[1-9]|1[0-2])-[0-3]\\d\\s*")){
                     message.append("Invalid start date").append("; ");
-                    startDateField.setText(startDay.toString());
+                    startDateField.setText(startDay.toString().substring(0,10));
                     startDateLabel.setForeground(Color.RED);
                     hasError = true;
                 }
@@ -385,7 +420,7 @@ public class UpdateWorkerPanel extends GeneralPanel{
                 String endDate = endDateField.getText();
                 if (!endDate.matches("\\s*(?!0000)(\\d{4})-(0[1-9]|1[0-2])-[0-3]\\d\\s*")){
                     message.append("Invalid end date").append("; ");
-                    endDateField.setText(endDay.toString());
+                    endDateField.setText(endDay.toString().substring(0,10));
                     endDateLabel.setForeground(Color.RED);
                     hasError = true;
                 }
@@ -445,6 +480,17 @@ public class UpdateWorkerPanel extends GeneralPanel{
 
         constraints.gridx = 1;
         jPanel.add(submitButton, constraints);
+
+        constraints.gridx = 2;
+        langJComboBox = new JComboBox<>(Languages.values());
+        langJComboBox.setSelectedItem(language);
+        langJComboBox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                changeLangue((Languages) langJComboBox.getSelectedItem());
+            }
+        });
+        jPanel.add(langJComboBox, constraints);
 
         // set border for the panel
         jPanel.setBorder(BorderFactory.createTitledBorder(

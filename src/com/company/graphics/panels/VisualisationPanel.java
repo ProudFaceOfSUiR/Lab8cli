@@ -4,8 +4,11 @@ import com.company.classes.Coordinates;
 import com.company.classes.Worker;
 import com.company.database.DataBase;
 import com.company.enums.Commands;
+import com.company.enums.Languages;
 import com.company.exceptions.NotConnectedException;
+import com.company.graphics.Language;
 import com.company.graphics.frames.GeneralFrame;
+import com.company.graphics.frames.MainFrame;
 import com.company.network.Client;
 import com.company.network.Messages;
 
@@ -13,12 +16,19 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.LinkedList;
+import java.util.Locale;
 
 public class VisualisationPanel extends GeneralPanel {
 
     Client client;
     LinkedList<Worker> dataBase;
     Messages input = null;
+    JTextArea messageArea;
+    JPanel visualisation;
+    JPanel info;
+
+    JButton backButton;
+    JComboBox langJComboBox;
 
     public void updateImage(){
         try {
@@ -28,18 +38,68 @@ public class VisualisationPanel extends GeneralPanel {
         }
         dataBase = (LinkedList<Worker>) input.getObject(1);
 
-        this.removeAll();
+        visualisation.removeAll();
         for (Worker w: dataBase){
-            this.add(new VisualWorker(w));
+            visualisation.add(new VisualWorker(w));
         }
-        this.revalidate();
+        visualisation.revalidate();
     }
 
-    public VisualisationPanel(GeneralFrame parentFrame, Container c, Client client) {
-        super(parentFrame, c);
+    public void changeLangue(Languages lang){
+        changeLanguage(lang);
+        backButton.setText(language.getBackButton());
+
+        langJComboBox.setSelectedItem(lang);
+
+        revalidate();
+    }
+
+    public VisualisationPanel(GeneralFrame parentFrame, Container c, Client client, Locale locale, Language language, Languages currentLanguage) {
+        super(parentFrame, c, locale, language, currentLanguage);
+
+        BoxLayout boxlayout = new BoxLayout(this, BoxLayout.Y_AXIS);
+        this.setLayout(boxlayout);
+
+        info = new JPanel();
+        visualisation = new JPanel();
+
+        String message = "";
+        messageArea = new JTextArea(message);
+        messageArea.setMinimumSize(new Dimension(250, 50));
+        messageArea.setPreferredSize(new Dimension(250, 50));
+        messageArea.setMaximumSize(new Dimension(250, 50));
+        messageArea.setEditable(false);
+        messageArea.setLineWrap(true);
+        messageArea.setWrapStyleWord(true);
 
         this.client = client;
         container = this;
+
+        langJComboBox = new JComboBox<>(Languages.values());
+        langJComboBox.setSelectedItem(language);
+        langJComboBox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                changeLangue((Languages) langJComboBox.getSelectedItem());
+            }
+        });
+
+
+
+        backButton = new JButton(language.getBackButton());
+        backButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                changePanelInFrame("database");
+            }
+        });
+
+        info.add(messageArea);
+        info.add(backButton);
+        info.add(langJComboBox);
+
+        this.add(info);
+        this.add(visualisation);
 
         updateImage();
 
@@ -49,6 +109,7 @@ public class VisualisationPanel extends GeneralPanel {
             {
                 System.out.println("Visualisation shown");
                 updateImage();
+                changeLangue(language.getCurrentLang());
             }
 
             public void componentHidden ( ComponentEvent e )
@@ -56,6 +117,7 @@ public class VisualisationPanel extends GeneralPanel {
                 System.out.println ( "Visualisation hidden" );
             }
         } );
+
 
         this.setVisible(true);
     }
@@ -74,12 +136,14 @@ public class VisualisationPanel extends GeneralPanel {
         int width;
         int height;
         Color color;
+        long id;
 
         public VisualWorker(Worker worker) {
             this.x = (int) worker.getCoordinates().getX();
             this.y = worker.getCoordinates().getY();
             this.width = (int) worker.getSalary();
             this.height = (int) worker.getSalary();
+            this.id = worker.getId();
 
             System.out.println(this.height + " " + this.width);
 
@@ -137,7 +201,27 @@ public class VisualisationPanel extends GeneralPanel {
 
         @Override
         public void mouseClicked(MouseEvent e) {
-            changePanelInFrame("updateworker");
+            long id = this.id;
+
+            client.output.addObject(client.user);
+            client.output.addObject(Commands.UPDATE);
+            client.output.addObject(id);
+
+            try {
+                input = client.sendMessage();
+            } catch (Exception exception) {
+                exception.printStackTrace();
+            }
+
+            //aborting if response is string (== error)
+            if (input.getObject(1).getClass().equals(String.class)){
+                messageArea.setText((String) input.getObject(1));
+                return;
+            } else {
+                MainFrame generalFrame = (MainFrame) parentFrame;
+                generalFrame.setWorkerToUpdate((Worker) input.getObject(1));
+                changePanelInFrame("updateworker");
+            }
         }
 
         @Override

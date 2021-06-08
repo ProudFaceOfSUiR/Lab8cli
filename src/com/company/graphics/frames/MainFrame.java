@@ -4,6 +4,8 @@ package com.company.graphics.frames;
 import com.company.classes.Worker;
 import com.company.database.DataBase;
 import com.company.enums.Commands;
+import com.company.enums.Languages;
+import com.company.graphics.Language;
 import com.company.graphics.panels.*;
 import com.company.network.Client;
 
@@ -12,8 +14,12 @@ import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 public class MainFrame extends GeneralFrame {
+
+    Language language = new Language();
 
     DataBase dataBase;
     Client client;
@@ -37,8 +43,8 @@ public class MainFrame extends GeneralFrame {
         this.setDefaultCloseOperation((Integer) p);
     }
 
-    public MainFrame(DataBase dataBase, Client client) {
-        super(new CardLayout(), new Container());
+    public MainFrame(DataBase dataBase, Client client, Locale locale) {
+        super(new CardLayout(), new Container(), locale);
 
         this.dataBase = dataBase;
         this.client = client;
@@ -67,6 +73,7 @@ public class MainFrame extends GeneralFrame {
             }
         });
 
+        language.setLanguage(Languages.ru_RU);
         this.setWindowSize(800, 600);
         setScreenSize();
         this.setBounds(screenWidth/2 - 350, screenHeigth/2-300, width,heigth);
@@ -86,14 +93,18 @@ public class MainFrame extends GeneralFrame {
     }
 
     public void run(){
-        loginPanel = new LoginPanel(this,c, client);
+        Language language = new Language();
+        Languages currentLanguage = Languages.ru_RU;
+        language.setLanguage(currentLanguage);
+
+        loginPanel = new LoginPanel(this,c, client,locale,language, currentLanguage);
         loginPanel.initializeLoginFrame();
-        dataBasePanel = new DataBasePanel(this,c,client);
+        dataBasePanel = new DataBasePanel(this,c,client,locale, language, currentLanguage);
         dataBasePanel.initializeDatabaseFrame();
 
-        addWorkerPanel = new AddWorkerPanel(this,c,client);
-        updateWorkerPanel = new UpdateWorkerPanel(this,c,client);
-        visualisationPanel = new VisualisationPanel(this, c,client);
+        addWorkerPanel = new AddWorkerPanel(this,c,client,locale, language, currentLanguage);
+        updateWorkerPanel = new UpdateWorkerPanel(this,c,client,locale, language, currentLanguage);
+        visualisationPanel = new VisualisationPanel(this, c,client,locale, language,currentLanguage);
 
         c.add(loginPanel, "login");
         cards.next(c);

@@ -4,8 +4,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Locale;
 
 public class GeneralFrame extends JFrame {
+    Locale locale;
     //screen size
     protected int screenWidth;
     protected int screenHeigth;
@@ -16,9 +18,10 @@ public class GeneralFrame extends JFrame {
     public CardLayout cards;
     public Container c;
 
-    public GeneralFrame(CardLayout cards, Container c){
+    public GeneralFrame(CardLayout cards, Container c, Locale locale){
         this.cards = cards;
         this.c = c;
+        this.locale = locale;
     }
 
     public void setWindowSize(int width, int heigth){
